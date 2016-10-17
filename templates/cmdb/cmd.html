@@ -15,7 +15,7 @@
 			</td>
 		</tr>
 	</table>
-</div>
+</div> 
 
 
 <table width="100%" height="64" border="0" cellspacing="0"
@@ -65,9 +65,9 @@
 					<tr>
 						<td>
 
-							<select name="host_ip" id="host_ip" class="sys_server_select" 
+							<select name="host_ip" id="host_ip" class="sys_server_select"
 								size="40" multiple>
-					<!--			<option value="-1"><-请选择主机-></option> -->
+								<!--			<option value="-1"><-请选择主机-></option> -->
 							</select>
 						</td>
 					</tr>
@@ -88,35 +88,35 @@
 										onmouseout="hiddenDIV('operate'); return false">
 									]
 									<div id="operate"
-										style="filter: Alpha(opacity =       90); display: none; position: absolute; top: 155px; left: auto; width: 400px; BORDER-RIGHT: 2px outset; BORDER-TOP: 1px outset; BACKGROUND: #eeeeee; BORDER-LEFT: 1px outset; B ORDER-BOTTOM: 2px outset; text-align: left;">
+										style="filter: Alpha(opacity =         90); display: none; position: absolute; top: 155px; left: auto; width: 400px; BORDER-RIGHT: 2px outset; BORDER-TOP: 1px outset; BACKGROUND: #eeeeee; BORDER-LEFT: 1px outset; B ORDER-BOTTOM: 2px outset; text-align: left;">
 										<table cellpadding="3" cellspacing="1">
 											<tr>
 												<td id="module_caption"></td>
 											</tr>
 										</table>
 									</div>
-									</legend>
-									<table width="100%" height="10" border="0" cellpadding="3"
-										cellspacing="0">
-										<tr>
-											<td width="30%">
-												<div id="module_extend"></div>
-											</td>
-											<td align="center">
-												<input type="button" name="Submit_run" value="运  行"
-													id="sys_run_button" onClick="return subcmd();">
-												<input type="button" name="Submit_ref" value="刷  屏"
-													id="sys_run_button" onClick="return clear_screen();">
-												<input type="button" name="Submit_add" value="添加模块"
-													id="sys_add_button"
-													onClick="javascript:window.location.href='/autoadmin/module_add/';">
-												<input type="button" name="Submit_add" value="安全审计"
-													id="sys_add_button"
-													onClick="javascript:window.location.href='/omaudit/';">
-											</td>
-										</tr>
-									</table>
-								
+								</legend>
+								<table width="100%" height="10" border="0" cellpadding="3"
+									cellspacing="0">
+									<tr>
+										<td width="30%">
+											<div id="module_extend"></div>
+										</td>
+										<td align="center">
+											<input type="button" name="Submit_run" value="运  行"
+												id="sys_run_button" onClick="return subcmd();">
+											<input type="button" name="Submit_ref" value="刷  屏"
+												id="sys_run_button" onClick="return clear_screen();">
+											<input type="button" name="Submit_add" value="添加模块"
+												id="sys_add_button"
+												onClick="javascript:window.location.href='/autoadmin/module_add/';">
+											<input type="button" name="Submit_add" value="安全审计"
+												id="sys_add_button"
+												onClick="javascript:window.location.href='/omaudit/';">
+										</td>
+									</tr>
+								</table>
+
 							</fieldset>
 						</td>
 					</tr>
@@ -158,7 +158,7 @@
 
 {% endblock %} {% block cmdb_js %}
 
-<script  src='/static/js/jquery-smartMenu.js'></script>
+<script src='/static/js/jquery-smartMenu.js'></script>
 
 <script>
 	$(function() {
@@ -191,33 +191,30 @@
 						}
 					}
 				});
-		
-		
-		var data = [
-		            [{
-		        		text: "打开服务器",
-		        		func: function() {
-		            		var src = $(this).find('option:selected').text();
-		            		var ip = src.substring(src.indexOf("__")+2);  
-		            		window.open("https://" + ip +":4200");    
-			        	}
-			    	}]
-				   ];
-		
-		$("#host_ip").mousedown(function(e){
-			if(e.which == 3){
+
+		var data = [ [ {
+			text : "打开服务器",
+			func : function() {
+				var src = $(this).find('option:selected').text();
+				var ip = src.substring(src.indexOf("__") + 2);
+				window.open("https://" + ip + ":4200");
+			}
+		} ] ]; 
+
+		$("#host_ip").mousedown(function(e) {
+			if (e.which == 3) {
 				$("#host_ip").smartMenu(data);
 			}
-		}) 
+		})
+111
+		$("#host_ip").focus(function() {
+			$("#host_ip").css("background-color", "#FFFFCC");
+		});
 
+		$("#host_ip").blur(function() {
+			$("#host_ip").css("background-color", "#D6D6FF");
+		});
 
-	    $("#host_ip").find('option:selected').mouseenter(function(){
-	    	$(this).css("background-color","yellow");
-	    });
-	    $("#host_ip").find('option:selected').mouseleave(function(){
-	    	$(this).css("background-color","#E9E9E4");
-	    });
-  
 	});
 
 	function change_moduleinfo(arg) {
@@ -243,7 +240,8 @@
 	};
 
 	function change_hostgroup(arg) {
-		$.ajax({
+		$
+				.ajax({
 					type : "POST",
 					data : {
 						'hostgroup_id' : arg
@@ -256,15 +254,19 @@
 							if (data.length > 0) {
 								var str1 = '';
 								for ( var i = 0; i < data.length; i++) {
-									if(data[i].wan_ip){
+									if (data[i].wan_ip) {
 										var str1 = "<option value="+data[i].id+"><font class='baner_font'>"
-										+ data[i].hostname+"__"
-										+data[i].wan_ip+ "</font></option>";
-										$("#host_ip").prepend(str1);		
-									}else{
+												+ data[i].hostname
+												+ "__"
+												+ data[i].wan_ip
+												+ "</font></option>";
+										$("#host_ip").prepend(str1);
+									} else {
 										var str1 = "<option value="+data[i].id+"><font class='baner_font'>"
-										+ data[i].hostname+"__"
-										+ data[i].lan_ip +"</font></option>";
+												+ data[i].hostname
+												+ "__"
+												+ data[i].lan_ip
+												+ "</font></option>";
 										$("#host_ip").prepend(str1);
 									}
 

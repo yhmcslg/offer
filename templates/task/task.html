@@ -1,0 +1,84 @@
+{% extends 'master/layout.html' %} 
+
+
+
+{% block user %}
+	
+		{{ username }} -- {{ user_type }}
+	
+{% endblock %}
+
+
+{% block page-content %}
+
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-sm-1 col-md-1 sidebar">
+
+			<ul class="nav nav-sidebar">
+				<li>
+					<a class="navbar-brand" href="/task/task_create">创建编排任务</a>
+				</li>
+			</ul>
+
+			<ul class="nav nav-sidebar">
+				<li>
+					<a class="navbar-brand" href="/task/task_detail">任务编排明细</a>
+				</li>
+			</ul>
+			
+			<ul class="nav nav-sidebar">
+				<li>
+					<a class="navbar-brand" href="/task/task_log">日志</a>
+				</li>
+			</ul>
+		</div>
+
+
+
+		<div class="col-sm-9 col-sm-offset-1 col-md-10 col-md-offset-1 main">
+
+			{% block  task_detail %}
+
+			<h1 class="page-header">Task</h1>
+
+			{% endblock %}
+
+		</div>
+	</div>
+</div>
+
+{% endblock %}
+
+
+
+
+{% block js %}
+	<script>
+		   $(document).ready(function() {
+			
+				$("#task").css({
+					"color" : "red",
+					"font-size" : "20px"
+				});
+			});
+
+	   
+		   
+	</script>
+	
+		{% block task_js %}
+	
+
+	
+		{% endblock %}
+	
+	
+{% endblock %}
+
+
+
+
+
+
+

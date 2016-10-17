@@ -1,0 +1,23 @@
+{% extends 'cmdb/cmdb.html' %} 
+
+
+{% block cmdb_detail %}
+
+	service_status
+
+{% endblock %}
+
+
+{% block cmdb_js %}
+<script>
+	$(document).ready(function() {
+
+		$("[href='/cmdb/create_host']").parent().removeClass('active');
+		$("[href='/cmdb/host_list']").parent().removeClass('active');
+		$("[href='/cmdb/service_status']").parent().addClass('active');
+		$("[href='/cmdb/service_group']").parent().removeClass('active');
+		$("[href='/cmdb/host_group']").parent().removeClass('active');
+	});
+</script>
+
+{% endblock %}

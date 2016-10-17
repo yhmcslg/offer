@@ -1,0 +1,613 @@
+{% extends 'cmdb/cmdb.html' %} {% block cmdb_detail %}
+
+<h2 class="sub-header">主机列表</h2>
+
+
+<form name="frm">
+	<table>
+		<tr>
+			<td>
+				<div>
+					<input type="button" class="btn btn-default btn-sm active"
+						type='button' value='添加' onclick='AddItem();' />
+				</div>
+			</td>
+			<td>
+				<label>主机组:</label>
+			</td>
+			<td>
+
+				<select id="hostgroup" name="hostgroup" class="form-control"
+					onChange="getHostGroup(this.value)">
+					
+
+				</select>
+			</td>
+			<td>
+				<label>主机状态:</label>
+			</td>
+			<td>
+				<select id="hoststatus" name="hoststatus" class="form-control"
+					onChange="getHostStatus(this.value)">
+					
+				</select>
+			</td>
+		</tr>
+	</table>
+</form>
+
+
+<div id="host_list_conditions" class="table-responsive">
+	<table class="table table-striped">
+		<thead>
+			<tr>
+				<th>ID</th>
+				<th>主机名</th>
+				<th>内网IP</th>
+				<th>外网IP</th>
+				<th>Ssh端口</th>
+				<th>内存</th>
+				<th>CPU</th>
+				<th>品牌型号</th>
+				<th>操作系统</th>
+				<th>状态</th>
+				<th>主机组</th>
+				<th>创建时间</th>
+				<th>更新时间</th>
+				<th>操作</th>
+			</tr>
+		</thead>
+
+		<tbody>
+
+			{% for d in data reversed%}
+			<tr>
+				<td>{{d.id}}</td>
+				<td>{{d.hostname}}</td>
+				<td>{{d.lan_ip}}</td>
+				<td>{{d.wan_ip}}</td>
+				<td>{{d.port}}</td>
+				<td>{{d.memory}}</td>
+				<td>{{d.cpu}}</td>
+				<td>{{d.brand}}</td>
+				<td>{{d.os}}</td>
+				{% ifequal d.status.name 'online' %}
+				<td class="success">{{d.status.name}}</td>
+				{% else %}
+				<td class="danger">{{d.status.name}}</td>
+				{% endifequal %}
+				<td>{{d.hostgroup}}</td>
+				<td>{{d.create_at|date:"Y-m-d H:i:s"}}</td>
+				<td>{{d.update_at|date:"Y-m-d H:i:s"}}</td>
+				<td>
+					<a onclick='EditItem(this);' class='label label-success'>编辑</a>
+					<a onclick='DeleteItem(this);' class='label label-danger''>删除</a
+				</td>
+			</tr>
+			{% endfor %}
+
+
+			<tr>
+				<td>总记录数:{{ count }}</td>
+				<td>总页数:{{ page_number }}</td>
+				<td>当前页数:<span id="current_page" name="current_page">{{ currentPage }}</span></td>
+			</tr>
+
+
+
+
+
+		</tbody>
+
+
+	</table>
+
+	{{ page|safe }}
+
+</div>
+
+
+
+
+
+
+
+<!-- 添加层开始 -->
+<div id='wpq-modal' class='wpq-modal hide'>
+	<div class='cancle' onclick='CancleShade();'>x</div>
+	<div class='title'>编辑</div>
+	<form id='form' class='form' >
+		{% csrf_token %}
+		<div>
+			<input type='hidden' id='update_host_flag' name='update_host_flag' value='1'/>
+			<input type='hidden' id='nid' name='nid' />
+			<input type='hidden' id='hostgroup_id' name='hostgroup_id' />
+			<input type='hidden' id='hoststatus_id' name='hoststatus_id' />
+			<p>
+				<label for='hostname'>主机名：</label>
+				<input type='text' id='hostname' name='hostname' />
+			</p>
+			<p>
+				<label for='lan_ip'>内网IP：</label>
+				<input type='text' id='lan_ip' name='lan_ip' />
+			</p>
+
+			<p>
+				<label for='wan_ip'>外网IP：</label>
+				<input type='text' id='wan_ip' name='wan_ip' />
+			</p>
+
+			<p>
+				<label for='port'>Ssh端口：</label>
+				<input type='text' id='port' name='port' />
+			</p>
+			
+			<p>
+				<label for='memory'>内存：</label>
+				<input type='text' id='memory' name='memory' />
+			</p>
+
+
+			<p>
+				<label for='cpu'>CPU：</label>
+				<input type='text' id='cpu' name='cpu' />
+			</p>
+
+			<p>
+				<label for='brand'>品牌型号：</label>
+				<input type='text' id='brand' name='brand' />
+			</p>
+
+			<p>
+				<label for='os'>操作系统：</label>
+				<input type='text' id='os' name='os' />
+			</p>
+
+
+			<p>
+				<label for='status'>状态：</label>
+				<input type='text' id='status' name='status' />
+			</p>
+
+			<p>
+				<label for='hostgroup2'>主机组：</label>
+				<input type='text' id='hostgroup2' name='hostgroup2' />
+			</p>
+
+			<input type='hidden' id='page_id' name='page_id' />
+		</div>
+		<div class='bottom'>
+			<input type='button' id="submit_sure" name="submit_sure" value='确定' onclick='change_host()'; />
+			<input type='button' value='关闭' onclick='CancleShade();' />
+		</div>
+	</form>
+</div>
+<!-- 添加层结束 -->
+
+<!-- 删除层开始 -->
+<div id='wpq-modal-del' class='wpq-modal hide'>
+	<div class='cancle' onclick='CancleShade();'>x</div>
+	<div class='title'>提示</div>
+	<form id='form1' class='form' method='post' action='/cmdb/del_host/'>
+		{% csrf_token %}
+		<div>
+			<input type='hidden' id='delnid' name='delnid' />
+			<input type='hidden' id='page_id2' name='page_id2' />
+			是否要删除？
+		</div>
+		<div class='bottom'>
+			<input type='submit' value='确定' />
+			<input type='button' value='关闭' onclick='CancleShade();' />
+		</div>
+	</form>
+</div>
+<!-- 删除层结束 -->
+
+<!-- 遮罩层开始 -->
+<div id='shade' class='shade hide'></div>
+<!-- 遮罩层结束 -->
+
+
+
+
+{% endblock %} {% block cmdb_js %}
+
+<script type="text/javascript">
+
+
+
+		function loadData() { 
+	    	   $('body').on('click', '.act_post',function (e) {
+
+		        e.preventDefault();
+		        e.stopPropagation();
+
+	            
+			    $.ajax({
+			        type: "POST",
+			        url : $(this).attr('href'),
+			        success: function(data,textStatus){
+			        	if(textStatus == 'success'){
+				            $('#host_list_conditions').empty();
+				            $('#host_list_conditions').html(data);
+			        	}
+			        }
+			    });
+		})
+		}
+	
+		
+		
+		function My_Url(paras){   
+		    var url = location.href;   
+		    var paraString = url.substring(url.indexOf("?")+1,url.length).split("&");   
+		    var paraObj = {}   
+		    for (i=0; j=paraString[i]; i++){   
+		        paraObj[j.substring(0,j.indexOf("=")).toLowerCase()] = j.substring(j.indexOf("=")+1,j.length);   
+		    }   
+		    var returnValue = paraObj[paras.toLowerCase()];   
+		    if(typeof(returnValue)=="undefined"){   
+		        return "";   
+		    }else{   
+		        return returnValue;   
+		    }   
+		} 
+	
+		var hostgroupid = My_Url('hostgroup_id');
+		var hoststatus_id = My_Url('hoststatus_id');
+		
+		$(function() {
+	
+			$("[href='/cmdb/create_host']").parent().removeClass('active');
+			$("[href='/cmdb/host_list']").parent().addClass('active');
+			$("[href='/cmdb/service_status']").parent().removeClass('active');
+			$("[href='/cmdb/service_group']").parent().removeClass('active');
+			$("[href='/cmdb/host_group']").parent().removeClass('active');
+			
+		       //$('.act_post').on('click', function (e) {
+		    	   $('body').on('click', '.act_post',function (e) {
+
+		    	   console.log('=========================');
+			        e.preventDefault();
+			        e.stopPropagation();
+		    	    
+
+			        var hostgroup_id = $("#hostgroup").val();
+			        if(undefined == hostgroup_id || 0 == hostgroup_id){
+			            hostgroup_id = '';
+			        }
+			        var hoststatus_id = $("#hoststatus").val();
+			        if(undefined == hoststatus_id || 0 == hoststatus_id){
+			            hoststatus_id = '';
+			        }
+				    
+
+				    var post_url = $(this).attr('href');
+				    
+				    var in_val = post_url.indexOf("&")
+
+				    if(in_val>0){
+				      var b_url = post_url.substring(0,post_url.indexOf("&"))
+
+				      var page_id = b_url.substring(b_url.indexOf('=')+1)
+				    }
+				    else{
+				      var page_id = post_url.substring(post_url.indexOf("=")+1)
+				      }
+				    
+	
+		            /*
+		            if(typeof(page_id) == "undefined"){
+		            	page_id = ''
+		            }
+		            console.log(page_id);
+		            
+		            var hostgroup_id = $("#hostgroup").val();
+		            if(undefined == hostgroup_id || 0 == hostgroup_id){
+		                hostgroup_id = '';
+		            }
+		            var hoststatus_id = $("#hoststatus").val();
+		            if(undefined == hoststatus_id || 0 == hoststatus_id){
+		                hoststatus_id = '';
+		            }
+	       			*/
+		            
+				    $.ajax({
+				        type: "POST",
+				        url : $(this).attr('href').substring(0,$(this).attr('href').indexOf("?")),
+				        data:{
+				    		'hostgroup_id':hostgroup_id,
+				    		'hoststatus_id':hoststatus_id,
+				    		'page_id':page_id,
+				        },
+				    
+				        success: function(data,textStatus){
+				        	if(textStatus == 'success'){
+					           console.log(data);
+				        		$('#host_list_conditions').empty();
+					            $('#host_list_conditions').html(data);
+				        	}
+				        }
+				    });
+		            return false;
+		        });
+				
+		        $.ajax({
+			            type: "POST",
+			            url: "/cmdb/getHostGroup/",  
+			            dataType:'json',
+			            success: function(data,textStatus){
+			            	console.log(data.length);
+		    	            if(textStatus == 'success') {
+		    	                	$("#hostgroup").empty();
+		    	                	if(data.length >0){
+		    	                		var str1 = '';
+		    	                    	for(var i=0;i<data.length;i++){
+		    	                    		if(hostgroupid){
+				    	                    	var str1 = "<option value="+data[i].group_id+">"+data[i].group_name+"</option>";
+				    	                        $("#hostgroup").prepend(str1); 	
+				    	            			$("#hostgroup option[value=" + hostgroupid + "]").attr("selected", "selected");
+				    	            			$("#hostgroup option[value!=" + hostgroupid + "]").attr("selected",false);
+		    	                    		}else{
+				    	                    	var str1 = "<option value="+data[i].group_id+">"+data[i].group_name+"</option>";
+				    	                        $("#hostgroup").prepend(str1); 	
+		    	                    		}
+		    	                    	}
+    	                    			$("#hostgroup option[value='0']").attr("selected", "selected");
+			    	            		$("#hostgroup option[value!='0']").attr("selected",false);
+		    	                	}  
+		    	             }	
+		        		}
+		        		});
+		        
+		        
+		        
+		        
+		        $.ajax({
+		            type: "POST",
+		            url: "/cmdb/getHostStatus/",  
+		            dataType:'json',
+		            success: function(data,textStatus){
+		    	            if(textStatus == 'success') {
+			                	$("#hoststatus").empty();
+			                	if(data.length >0){
+			                		var str1 = '';
+				                    	for(var i=0;i<data.length;i++){
+			    	                    	var str1 = "<option value="+data[i].host_status_id+">"+data[i].host_status+"</option>";
+			    	                        $("#hoststatus").prepend(str1); 
+			    	                        if(hoststatus_id){
+				    	            			$("#hoststatus option[value=" + hoststatus_id + "]").attr("selected", "selected");
+				    	            			$("#hoststatus option[value!=" + hoststatus_id + "]").attr("selected",false);
+			    	                        }
+
+				                    	}
+			                	}  
+			             }	
+			        	}	
+	        		})
+		    		});
+
+		
+		$(function(){
+			$.validate('#form');
+		})
+		
+		function AddItem(){
+			$('#form :text').val(null);
+			$('#page_id').val({{ page_number }});
+			$('#wpq-modal,#shade').removeClass('hide');
+		}
+		function CancleShade(){
+			$('#wpq-modal,#wpq-modal-del,#shade').addClass('hide');
+		}
+		
+		function EditItem(arg){
+			var data = []
+			var others = $(arg).parent().prevAll();
+			
+			$.each(others,function(i,value){
+				data.push($(value).text());
+			})
+			
+			var group_id = $("#hostgroup").val();
+			
+			var status_id = $("#hoststatus").val();
+			
+			var page_id = $("#current_page").text();
+			
+			console.log(group_id);
+			console.log(status_id);
+			console.log(page_id);
+			console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
+			data = data.reverse()
+
+			$('#nid').val(data[0]);
+			$("#hostgroup_id").val(group_id);
+			$("#hoststatus_id").val(status_id);
+			$('#hostname').val(data[1]);
+			$('#lan_ip').val(data[2]);
+			$('#wan_ip').val(data[3]);
+			$('#port').val(data[4]);
+			$('#memory').val(data[5]);
+			$('#cpu').val(data[6]);
+			$('#brand').val(data[7]);
+			$('#os').val(data[8]);
+			$('#status').val(data[9]);
+			$('#hostgroup2').val(data[10]);
+			$('#page_id').val(page_id);
+			$('#wpq-modal,#shade').removeClass('hide');
+			
+		}
+		
+		 function change_host(){
+		    	
+		        var hostgroup_id = $("#hostgroup_id").val();
+		        if(undefined == hostgroup_id){
+		            hostgroup_id = '';
+		        }
+		        var hoststatus_id = $("#hoststatus_id").val();
+		        if(undefined == hoststatus_id){
+		            hoststatus_id = '';
+		        }
+
+		        var page_id = $("#page_id").val();
+		        if(undefined == page_id || 0 == page_id){
+		            hoststatus_id = '';
+		        }
+	            
+		        var update_host_flag = $("#update_host_flag").val();
+		        
+		        var nid = $("#nid").val();
+				var hostname = $("#hostname").val();	        
+				var lan_ip = $("#lan_ip").val();
+				var wan_ip = $("#wan_ip").val();
+				var port = $("#port").val();
+				var memory = $("#memory").val();
+				var cpu = $("#cpu").val();
+				var brand = $("#brand").val();
+				var os = $("#os").val();
+				var status = $("#status").val();
+				var hostgroup2 = $("#hostgroup2").val();
+				
+				console.log(nid);
+				
+			    $.ajax({
+			        type: "POST",
+			        url : "/cmdb/host_list_s/",
+			        data:{
+			    		'hostgroup_id':hostgroup_id,
+			    		'hoststatus_id':hoststatus_id,
+			    		'page_id':page_id,
+			    		'update_host_flag': update_host_flag,
+			    		'hostname': hostname,
+			    		'lan_ip': lan_ip,
+			    		'wan_ip': wan_ip,
+			    		'port': port,
+			    		'memory': memory,
+			    		'cpu': cpu,
+			    		'brand': brand,
+			    		'os': os,
+			    		'status': status,
+			    		'hostgroup2': hostgroup2,
+			    		'nid': nid
+			        },
+			    
+			        success: function(data,textStatus){
+			        	if(textStatus == 'success'){
+				           console.log(data);
+			        		$('#host_list_conditions').empty();
+				            $('#host_list_conditions').html(data);
+			        	}
+			        }
+			    });
+			$('#wpq-modal,#wpq-modal-del,#shade').addClass('hide');
+	        };	
+		function DeleteItem(arg){
+			var data = []
+			var others = $(arg).parent().prevAll();
+			$.each(others,function(i,value){
+				data.push($(value).text());
+			})
+			data = data.reverse()
+		
+			$('#delnid').val(data[0])
+			$('#page_id2').val({{ page_number }});
+			$('#wpq-modal-del,#shade').removeClass('hide');
+			
+			
+		}
+		
+	    function getHostGroup(hostgroupid){
+	    	
+	    	
+			$("#hostgroup option[value=" + hostgroupid + "]").attr("selected", "selected");
+			$("#hostgroup option[value!=" + hostgroupid + "]").attr("selected",false);
+	
+			var page_id = $("#page_id").val();
+			
+	        $.ajax({
+	            type: "POST",
+	            url: "/cmdb/getHostStatus/",  
+	            dataType:'json',
+	            success: function(data,textStatus){
+
+    	            if(textStatus == 'success') {
+	                	$("#hoststatus").empty();
+	                	if(data.length >0){
+	                		var str1 = '';
+
+	                		//if(hostgroupid == 0){
+    	                    //	var str1 = "<option selected>请选择</option>";
+    	                    //    $("#hoststatus").append(str1); 
+	                		//}else{
+		                    	for(var i=0;i<data.length;i++){
+	    	                    	var str1 = "<option value="+data[i].host_status_id+">"+data[i].host_status+"</option>";
+	    	                        $("#hoststatus").prepend(str1); 	
+		                    	}
+	                		//}
+	                	}  
+	             }	
+	        	}
+        	});
+	        
+	        
+	     
+	        $.ajax({
+	            type: "POST",
+	            data: {
+	            	'page_id':page_id,
+	            	'hostgroup_id':hostgroupid
+	            	},
+	            url: "/cmdb/host_list_s/",  
+	            success: function(data,textStatus){
+    	            if(textStatus == 'success') {
+    	            		console.log(',,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,');
+    	            		$("#host_list_conditions").html(data);
+	             }	
+	        	}   		
+	            		
+        	});
+	        
+	        
+	        
+	    	};
+		
+	    	
+	   
+	   
+	    	
+	    function getHostStatus(hoststatus_id){
+			$("#hoststatus option[value=" + hoststatus_id + "]").attr("selected", "selected");
+			$("#hoststatus option[value!=" + hoststatus_id + "]").attr("selected",false);
+			
+			var page_id = $("#page_id").val();
+			var hostgroup_id = $("#hostgroup option:selected").val();
+			
+	
+	        $.ajax({
+		            type: "POST",
+		            data: {'page_id':page_id,'hostgroup_id':hostgroup_id,'hoststatus_id':hoststatus_id},
+		            url: "/cmdb/host_list_s/",  
+		            		
+		            success: function(data,textStatus){
+
+	    	            if(textStatus == 'success') {
+	    	            		console.log('.........................');
+	    	            		$("#host_list_conditions").html(data);
+	    						$("#hoststatus option[value=" + hoststatus_id + "]").attr("selected", "selected");
+	    						$("#hoststatus option[value!=" + hoststatus_id + "]").attr("selected",false);
+	 
+		             }	
+		        	}    		
+	
+	        	});
+
+	    	};
+	 
+	</script>
+
+{% endblock %}
+
+
+
+

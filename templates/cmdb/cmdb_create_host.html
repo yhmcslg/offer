@@ -1,0 +1,190 @@
+{% extends 'cmdb/cmdb.html' %}
+
+ {% block cmdb_detail %}
+
+{% block css %}
+	<link href="/static/css/jquery-ui.css" rel="stylesheet">
+	<link href="/static/css/jquery-ui-timepicker-addon.css" rel="stylesheet">
+{% endblock %}
+
+
+<h1 class="page-header">添加主机</h1>
+
+<div class="row placeholders">
+
+
+	<div class="col-xs-6 col-sm-6 placeholder">
+		<form class="form-horizontal" method="POST" action="/cmdb/create_host/">
+			{% csrf_token %}
+			<div class="form-group">
+				<label for="inputEmail3" class="col-sm-2 control-label">主机名</label>
+
+				<div class="col-sm-10">
+
+					{{form.hostname}}
+					<span style="color: red">{{form.hostname.errors}}</span>
+				</div>
+
+			</div>
+			
+	
+			<div class="form-group">
+				<label for="inputEmail3" class="col-sm-2 control-label">内网IP</label>
+
+				<div class="col-sm-10">
+
+					{{form.lan_ip}}
+					<span style="color: red">{{form.lan_ip.errors}}</span>
+				</div>
+
+			</div>	
+	
+
+			<div class="form-group">
+				<label for="inputEmail3" class="col-sm-2 control-label">外网IP</label>
+
+				<div class="col-sm-10">
+
+					{{form.wan_ip}}
+					<span style="color: red">{{form.wan_ip.errors}}</span>
+				</div>
+
+			</div>	
+	
+	
+			<div class="form-group">
+				<label for="inputEmail3" class="col-sm-2 control-label">内存</label>
+
+				<div class="col-sm-10">
+
+					{{form.memory}}
+					<span style="color: red">{{form.memory.errors}}</span>
+				</div>
+
+			</div>		
+			
+			
+			
+			<div class="form-group">
+				<label for="inputEmail3" class="col-sm-2 control-label">CPU</label>
+
+				<div class="col-sm-10">
+
+					{{form.cpu}}
+					<span style="color: red">{{form.cpu.errors}}</span>
+				</div>
+
+			</div>				
+			
+			
+			<div class="form-group">
+				<label for="inputEmail3" class="col-sm-2 control-label">品牌型号</label>
+
+				<div class="col-sm-10">
+
+					{{form.brand}}
+					<span style="color: red">{{form.brand.errors}}</span>
+				</div>
+
+			</div>				
+	
+	
+			<div class="form-group">
+				<label for="inputEmail3" class="col-sm-2 control-label">操作系统</label>
+
+				<div class="col-sm-10">
+
+					{{form.os}}
+					<span style="color: red">{{form.os.errors}}</span>
+				</div>
+
+			</div>		
+	
+	
+			<div class="form-group">
+				<label for="inputEmail3" class="col-sm-2 control-label">状态</label>
+
+				<div class="col-sm-10">
+
+					{{ form.status }}
+					<span style="color: red">{{form.status.errors}}</span>
+				</div>
+
+			</div>	
+			
+			
+			<div class="form-group">
+				<label for="inputEmail3" class="col-sm-2 control-label">主机组</label>
+
+				<div class="col-sm-10">
+
+					{{form.hostgroup}}
+					<span style="color: red">{{form.hostgroup.errors}}</span>
+				</div>
+
+			</div>				
+			
+						
+			<div class="form-group">
+				<label class="col-sm-2 control-label">创建时间</label>
+				<div class="col-sm-10">
+
+					<input class="form-control" type="text" name="create_time"
+						id="datepicker" placeholder="不指定的时间的话，即代表立刻执行">
+				</div>
+			</div>
+			
+			<div class="form-group">
+				<label class="col-sm-2 control-label">更新时间</label>
+				<div class="col-sm-10">
+
+					<input class="form-control" type="text" name="update_time"
+						id="datepicker2" placeholder="不指定的时间的话，即代表立刻执行">
+				</div>
+			</div>			
+			
+			
+			<div class="form-group">
+				<div class="col-sm-offset-2 col-sm-10">
+					<button type="submit" class="btn btn-success">创建</button>
+				</div>
+			</div>
+		</form>
+	</div>
+
+
+</div>
+
+
+
+{% endblock %} 
+
+
+{% block cmdb_js %}
+
+	<script>
+	$(document).ready(function() {
+
+		$("[href='/cmdb/create_host']").parent().addClass('active');
+		$("[href='/cmdb/host_list']").parent().removeClass('active');
+		$("[href='/cmdb/service_status']").parent().removeClass('active');
+		$("[href='/cmdb/service_group']").parent().removeClass('active');
+		$("[href='/cmdb/host_group']").parent().removeClass('active');
+		
+
+	});
+	
+
+	 $("#datepicker").datetimepicker({
+	        inline: true
+	 });
+
+	 $("#datepicker2").datetimepicker({
+	        inline: true
+	 });
+	</script>
+{% endblock %}
+
+
+
+

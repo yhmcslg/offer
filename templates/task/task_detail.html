@@ -1,0 +1,145 @@
+{% extends 'task/task.html' %} 
+
+{% block task_detail %}
+
+<h2 class="sub-header">任务列表</h2>
+<div class="table-responsive">
+	<table class="table table-striped">
+		<thead>
+			<tr>
+				<th>任务ID</th>
+				<th>任务名称</th>
+				<th>描述</th>
+				<th>执行类型</th>
+				<th>任务内容</th>
+				<th>上传文件</th>
+				<th>选择的主机组</th>
+				<th>选择的主机</th>
+				<th>任务执行总数</th>
+				<th>已成功数量</th>
+				<th>已失败数量</th>
+				<th>创建人</th>
+				<th>执行时间</th>
+				<th>创建时间</th>
+				<th>操作</th>				
+			</tr>
+		</thead>
+		<tbody>
+
+			{% for task in task_list %}
+			<tr>
+				<td>{{task.id}}</td>
+				<td>{{task.name}}</td>
+				<td>{{task.description}}</td>
+				<td>{{task.execute_type}}</td>
+				<td>{{task.content}}</td>
+				<td>{{task.filename|safe}}</td>
+				<td>{{task.hostsgroup}}</td>
+				<td>{{task.hosts|safe}}</td>
+				<td>{{task.total_tasks}}</td>
+				<td class='success'>{{task.success}}</td>
+				<td class='danger'>{{task.failure}}</td>
+				<td>{{task.created_by}}</td>
+				<td>{{task.kick_off_at}}</td>
+				<td>{{task.create_time}}</td>
+				<td><a onclick='DeleteItem(this);' class='label label-danger''>删除</a></td>
+			</tr>
+			{%endfor%}
+		</tbody>
+		
+		<tr>
+			<td>总记录数:{{ count }}</td>
+			<td>当前页数:{{ page_number }}</td>
+		</tr>
+		
+	</table>
+</div>
+
+{{ page|safe }} 
+
+
+<!-- 删除层开始 -->
+<div id='wpq-modal-del' class='wpq-modal hide'>
+	<div class='cancle' onclick='CancleShade();'>x</div>
+	<div class='title'>提示</div>
+	<form id='form1' class='form' method='post' action='/task/del_task/'>
+		{% csrf_token %}
+		<div>
+			<input  type='hidden' id='delnid' name='delnid' />
+			<input  type='hidden' id='page_id2' name='page_id2' />
+			是否要删除？
+		</div>
+		<div class='bottom'>
+			<input type='submit' value='确定'/>
+			<input type='button' value='关闭' onclick='CancleShade();'/>
+		</div>
+	</form>
+</div>
+<!-- 删除层结束 -->
+
+<!-- 遮罩层开始 -->
+<div id='shade' class='shade hide'></div>
+<!-- 遮罩层结束 -->
+
+
+{% endblock %}
+
+
+{% block task_js %}
+
+	<script>
+		$(document).ready(function() {
+		
+			$("[href='/task/task_create']").parent().removeClass('active');
+			$("[href='/task/task_log']").parent().removeClass('active');
+			$("[href='/task/task_detail']").parent().addClass('active');
+			
+			
+			$("#p1").hover(function(){
+				   alert("你进入了 p1!");
+				   },
+				   function(){
+				   alert("拜拜! 现在你离开了 p1!");
+				 }); 
+			
+			
+			
+		
+		});
+		
+		$(function(){
+			$.validate('#form');
+		})
+		
+		
+		
+		function DeleteItem(arg){
+			var data = []
+			var others = $(arg).parent().prevAll();
+			$.each(others,function(i,value){
+				data.push($(value).text());
+			})
+			data = data.reverse()
+		
+			$('#delnid').val(data[0])
+			$('#page_id2').val({{ page_number }});
+			$('#wpq-modal-del,#shade').removeClass('hide');
+			
+			
+		}
+		
+		
+		
+		
+		
+		
+		
+	</script>
+
+
+{% endblock %}
+
+
+
+
+

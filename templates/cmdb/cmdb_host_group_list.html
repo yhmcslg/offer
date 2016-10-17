@@ -1,0 +1,293 @@
+{% extends 'cmdb/cmdb.html' %} {% block cmdb_detail %}
+
+<h2 class="sub-header">主机组列表</h2>
+
+
+<form name="frm">
+	<table>
+		<tr>
+			<td>
+				<div>
+					<input type="button" class="btn btn-default btn-sm active"
+						type='button' value='添加' onclick='AddItem();' />
+				</div>
+			</td>
+		</tr>
+	</table>
+
+</form>
+
+
+<div id="host_group_list_conditions" class="table-responsive">
+	<table class="table table-striped">
+		<thead>
+			<tr>
+				<th>ID</th>
+				<th>主机组名</th>
+			</tr>
+		</thead>
+
+		<tbody>
+
+			{% for d in data reversed%}
+			<tr>
+				<td>{{d.id}}</td>
+				<td>{{d.groupname}}</td>
+				<td>
+					<a onclick='EditItem(this);' class='label label-success'>编辑</a>
+					<a onclick='DeleteItem(this);' class='label label-danger''>删除</a
+				</td>
+			</tr>
+			{% endfor %}
+
+
+			<tr>
+				<td>总记录数:{{ count }}</td>
+				<td>总页数:{{ page_number }}</td>
+				<td>当前页数:{{ currentPage }}</td>
+			</tr>
+
+		</tbody>
+
+
+	</table>
+
+	{{ page|safe }}
+
+</div>
+
+
+<!-- 添加层开始 -->
+<div id='wpq-modal' class='wpq-modal hide'>
+	<div class='cancle' onclick='CancleShade();'>x</div>
+	<div class='title'>编辑</div>
+	<form id='form' class='form' method='post' action='/cmdb/host_group_del/'>
+		{% csrf_token %}
+		<div>
+			<input type='hidden' id='nid' name='nid' />
+		
+			<p>
+				<label for='hostgroup'>主机组：</label>
+				<input type='text' id='groupname' name='groupname' />
+			</p>
+
+			<input type='hidden' id='page_id' name='page_id' />
+		</div>
+		<div class='bottom'>
+			<input class='submit_hostgroup' type='submit' value='确定' />
+			<input type='button' value='关闭' onclick='CancleShade();' />
+		</div>
+	</form>
+</div>
+<!-- 添加层结束 -->
+
+<!-- 删除层开始 -->
+<div id='wpq-modal-del' class='wpq-modal hide'>
+	<div class='cancle' onclick='CancleShade();'>x</div>
+	<div class='title'>提示</div>
+	<form id='form1' class='form' method='post' action='/cmdb/host_group_del/'>
+		{% csrf_token %}
+		<div>
+			<input type='hidden' id='delnid' name='delnid' />
+			<input type='hidden' id='page_id2' name='page_id2' />
+			是否要删除<input type='text' id='del_hostgroup' name='del_hostgroup' />？
+		</div>
+		<div class='bottom'>
+			<input class='submit_del_hostgroup' type='submit' value='确定' />
+			<input type='button' value='关闭' onclick='CancleShade();' />
+		</div>
+	</form>
+</div>
+<!-- 删除层结束 -->
+
+<!-- 遮罩层开始 -->
+<div id='shade' class='shade hide'></div>
+<!-- 遮罩层结束 -->
+
+
+
+
+{% endblock %} {% block cmdb_js %}
+
+<script type="text/javascript">
+
+		$(function() {
+	
+			$("[href='/cmdb/create_host']").parent().removeClass('active');
+			$("[href='/cmdb/host_group_create']").parent().removeClass('active');
+			$("[href='/cmdb/host_list']").parent().removeClass('active');
+			$("[href='/cmdb/host_group_list']").parent().addClass('active');
+			$("[href='/cmdb/cmdb']").parent().removeClass('active');
+			
+			$('body').on('click', '.act_post',function (e) {
+
+			        e.preventDefault();
+			        e.stopPropagation();
+		    	    
+			     
+				   
+				    var post_url = $(this).attr('href');
+				    
+				    var in_val = post_url.indexOf("&")
+
+				    if(in_val>0){
+				      var b_url = post_url.substring(0,post_url.indexOf("&"))
+
+				      var page_id = b_url.substring(b_url.indexOf('=')+1)
+				    }
+				    else{
+				      var page_id = post_url.substring(post_url.indexOf("=")+1)
+				      }
+				    
+		            
+				    $.ajax({
+				        type: "POST",
+				        url : $(this).attr('href').substring(0,$(this).attr('href').indexOf("?")),
+				        data:{
+				    		'page_id':page_id,
+				        },
+				    
+				        success: function(data,textStatus){
+				        	if(textStatus == 'success'){
+				        		console.log('???????????????????????????????');
+				        		$('#host_group_list_conditions').empty();
+					            $('#host_group_list_conditions').html(data);
+				        	}
+				        }
+				    });
+		            return false;
+		        });
+			
+			
+			$('body').on('click', '.submit_hostgroup',function (e) {
+
+			        e.preventDefault();
+			        e.stopPropagation();
+				
+				   var hostgroupname = $('#groupname').val();
+				   
+				   var page_id = $('#page_id2').val();
+		
+				  	var id = $('#delnid').val();
+				  	
+				  	console.log(hostgroupname);
+				  	console.log(page_id);
+				  	console.log(id);
+				  	
+				    $.ajax({
+				        type: "POST",
+				        url : '/cmdb/host_group_update_add/',
+				        data:{
+				        	'id':delnid,
+				        	'hostgroupname':hostgroupname,
+				    		'page_id':page_id2, 
+				        },
+				    
+				        success: function(data,textStatus){
+				        	if(textStatus == 'success'){
+				        		console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@');
+				        		$('#host_group_list_conditions').empty();
+					            $('#host_group_list_conditions').html(data);
+				        	}
+				        }
+				    });
+		            //return true;
+		        });
+			
+			
+			$('body').on('click', '.submit_del_hostgroup',function (e) {
+
+		        e.preventDefault();
+		        e.stopPropagation();
+			
+			   var hostgroupname = $('#del_hostgroup').val();
+			   
+			   var page_id = $('#page_id2').val();
+	
+			  	var id = $('#delnid').val();
+			  	
+			  	console.log(hostgroupname);
+			  	console.log(page_id);
+			  	console.log(id);
+			  	
+			    $.ajax({
+			        type: "POST",
+			        url : '/cmdb/host_group_del/',
+			        data:{
+			        	'id':id,
+			        	'hostgroupname':hostgroupname,
+			    		'page_id':page_id, 
+			        },
+			    
+			        success: function(data,textStatus){
+			        	if(textStatus == 'success'){
+			        		console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@');
+			        		$('#host_group_list_conditions').empty();
+				            $('#host_group_list_conditions').html(data);
+			        	}
+			        }
+			    });
+	            //return true;
+	        });
+			
+			
+		    		});
+
+		
+		$(function(){
+			$.validate('#form');
+		})
+		
+		function AddItem(){
+			$('#form :text').val(null);
+			$('#page_id').val({{ page_number }});
+			$('#wpq-modal,#shade').removeClass('hide');
+		}
+		
+		
+		function CancleShade(){
+			$('#wpq-modal,#wpq-modal-del,#shade').addClass('hide');
+		}
+		
+		function EditItem(arg){
+			var data = []
+			var others = $(arg).parent().prevAll();
+			
+			$.each(others,function(i,value){
+				data.push($(value).text());
+			})
+			
+			data = data.reverse()
+			$('#nid').val(data[0]);
+			$('#groupname').val(data[1]);
+			$('#page_id').val({{ page_number }});
+			$('#wpq-modal,#shade').removeClass('hide');
+			
+
+		}
+		
+		function DeleteItem(arg){
+			var data = []
+			var others = $(arg).parent().prevAll();
+			$.each(others,function(i,value){
+				data.push($(value).text());
+			})
+			data = data.reverse();
+			console.log(data);
+			$('#delnid').val(data[0]);
+			$('#del_hostgroup').val(data[1]);
+			$('#page_id2').val({{ page_number }});
+			$('#wpq-modal-del,#shade').removeClass('hide');
+			
+			
+		}
+		
+	    
+	 
+	</script>
+
+{% endblock %}
+
+
+
+

@@ -1,0 +1,297 @@
+{% extends 'task/task.html' %} {% block task_detail %} {% block css %}
+<link href="/static/css/jquery-ui.css" rel="stylesheet">
+<link href="/static/css/jquery-ui-timepicker-addon.css" rel="stylesheet">
+{% endblock %}
+
+
+
+<ul id="myTab" class="nav nav-tabs">
+	<li class="active">
+		<a href="#home" data-toggle="tab"> 即时任务 </a>
+	</li>
+	<li>
+		<a href="#ios" data-toggle="tab">定时任务</a>
+	</li>
+</ul>
+
+<div id="myTabContent" class="tab-content">
+	<div class="tab-pane fade in active" id="home">
+		<div class="col-xs-6 col-sm-6 placeholder">
+			<form class="f-horizontal" enctype="multipart/form-data"
+				method="POST" action="/task/new_task">
+				{% csrf_token %}
+				<div class="form-group">
+					<label for="inputEmail3" class="col-sm-2 control-label">任务名称</label>
+
+					<div class="col-sm-10">
+
+						{{f.name}}
+						<span style="color: red">{{f.name.errors}}</span>
+					</div>
+
+				</div>
+
+
+
+
+				<div class="form-group">
+					<label class="col-sm-2 control-label">描述</label>
+					<div class="col-sm-10">{{f.description}}
+						{{f.description.errors}}</div>
+
+				</div>
+				
+				<div class="form-group">
+					<label class="col-sm-2 control-label">选择任务模板</label>
+					<div class="col-sm-10">
+						{{f.task_template}}
+						<span style="color: red">{{f.task_template.errors}}</span>
+					</div>
+				</div>				
+				
+				<div class="form-group">
+					<label class="col-sm-2 control-label">执行内容</label>
+					<div class="col-sm-10">
+						{{f.content}}
+						<span style="color: red">{{f.content.errors}}</span>
+					</div>
+				</div>
+				
+				<div class="form-group">
+					<label class="col-sm-2 control-label">另存为模板</label>
+					<div class="col-sm-10">
+						{{f.template_name}}
+						<span style="color: red">{{f.template_name.errors}}</span>
+					</div>
+				</div>
+				
+				<div class="form-group">
+					<label for="inputEmail3" class="col-sm-2 control-label">执行类型</label>
+					<div class="col-sm-10">
+						{{f.execute_type}}
+						<span style="color: red">{{f.execute_type.errors}}</span>
+					</div>
+				</div>
+
+
+
+				<div class="form-group">
+					<label class="col-sm-2 control-label">上传文件</label>
+					<div class="col-sm-10">
+						{{f.file}}
+						<span style="color: red">{{f.file.errors}}</span>
+					</div>
+				</div>
+
+
+				<div class="form-group">
+					<label for="inputEmail3" class="col-sm-2 control-label">选择主机组</label>
+					<div class="col-sm-10">
+						{{f.hostsgroup}}
+						<span style="color: red">{{f.hostsgroup.errors}}</span>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-sm-2 control-label">选择任务主机</label>
+					<div class="col-sm-10">
+						{{f.hosts}}
+						<span style="color: red">{{f.hosts.errors}}</span>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<div class="col-sm-offset-2 col-sm-10">
+						<button type="submit" class="btn btn-success">创建任务</button>
+					</div>
+				</div>
+			</form>
+		</div>
+
+	</div>
+
+	<div class="tab-pane fade" id="ios">
+		<div class="col-xs-6 col-sm-6 placeholder">
+			<form class="f-horizontal" enctype="multipart/form-data"
+				method="POST" action="/task/new_task">
+				{% csrf_token %}
+				<div class="form-group">
+					<label for="inputEmail3" class="col-sm-2 control-label">任务名称</label>
+
+					<div class="col-sm-10">
+
+						{{f.name}}
+						<span style="color: red">{{f.name.errors}}</span>
+					</div>
+
+				</div>
+
+
+
+
+				<div class="form-group">
+					<label class="col-sm-2 control-label">描述</label>
+					<div class="col-sm-10">{{f.description}}
+						{{f.description.errors}}</div>
+
+				</div>
+
+				<div class="form-group">
+					<label for="inputEmail3" class="col-sm-2 control-label">执行类型</label>
+					<div class="col-sm-10">
+						{{f.execute_type}}
+						<span style="color: red">{{f.execute_type.errors}}</span>
+					</div>
+				</div>
+
+
+
+				<div class="form-group">
+					<label class="col-sm-2 control-label">执行内容</label>
+					<div class="col-sm-10">
+						{{f.content}}
+						<span style="color: red">{{f.content.errors}}</span>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-sm-2 control-label">另存为模板</label>
+					<div class="col-sm-10">
+						{{f.template_name}}
+						<span style="color: red">{{f.template_name.errors}}</span>
+					</div>
+				</div>
+
+
+				<div class="form-group">
+					<label class="col-sm-2 control-label">上传文件</label>
+					<div class="col-sm-10">
+						{{f.file}}
+						<span style="color: red">{{f.file.errors}}</span>
+					</div>
+				</div>
+
+
+
+
+
+				<div class="form-group">
+					<label for="inputEmail3" class="col-sm-2 control-label">选择主机组</label>
+					<div class="col-sm-10">
+						{{f.hostsgroup}}
+						<span style="color: red">{{f.hostsgroup.errors}}</span>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-sm-2 control-label">选择任务主机</label>
+					<div class="col-sm-10">
+						{{f.hosts}}
+						<span style="color: red">{{f.hosts.errors}}</span>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-sm-2 control-label">存为任务模板</label>
+					<div class="col-sm-10">
+						{{f.is_template}}
+						<span style="color: red">{{f.is_template.errors}}</span>
+					</div>
+				</div>
+
+
+				<div class="form-group">
+					<label class="col-sm-2 control-label">执行时间</label>
+					<div class="col-sm-10">
+
+						<input class="form-control" type="text" name="kick_off_at"
+							id="datepicker" placeholder="不指定的时间的话，即代表立刻执行">
+						<span style="color: red">{{f.kick_off_at.errors}}</span>
+					</div>
+				</div>
+
+
+
+				<div class="form-group">
+					<div class="col-sm-offset-2 col-sm-10">
+						<button type="submit" class="btn btn-success">创建任务</button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+
+
+{% endblock %} {% block task_js %}
+
+<script>
+	$(document).ready(function() {
+
+		$("[href='/task/task_create']").parent().addClass('active');
+		$("[href='/task/task_log']").parent().removeClass('active');
+		$("[href='/task/task_detail']").parent().removeClass('active');
+		
+		
+		$("#id_hosts").empty();
+		
+
+	});
+
+	$("#datepicker").datetimepicker({
+		inline : true
+	});
+	
+	
+	
+	
+	
+	
+    function getTaskTemplateContent(task_template_id){
+        $.ajax({
+	            type: "GET",
+	            url: "/task/template_content_json?task_template_id="+task_template_id,  
+	            dataType:'json',
+	            success: function(data,textStatus){
+	                console.log(data.content);
+	                if(textStatus == 'success') {
+	                	$("#id_content").val(data.content);
+	            	}
+	        	}
+        	});
+    	};
+    	
+    	
+    	
+        function getHostName(hostGroup_id){
+            $.ajax({
+    	            type: "GET",
+    	            url: "/task/host_Group_Name_json?hostGroup_id="+hostGroup_id,  
+    	            dataType:'json',
+    	            success: function(data,textStatus){
+    	          	           
+    	                if(textStatus == 'success') {
+    	                	$("#id_hosts").empty();
+    	                	if(data.length >0){
+    	                		var str1 = '';
+    	                    	for(var i=0;i<data.length;i++){
+    	                    		var str1 = "<option value="+data[i].id+">"+data[i].hostname+"</option>";
+    	                        	$("#id_hosts").prepend(str1); 
+    	                    	}
+    	                	}  
+    	                }	
+    	            }
+            	});
+        	};
+	
+
+
+	
+</script>
+
+
+{% endblock %}
+
+
+

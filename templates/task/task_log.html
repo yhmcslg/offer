@@ -1,0 +1,147 @@
+{% extends 'task/task.html' %} {% block task_detail %}
+
+<h2 class="sub-header">日志详细</h2>
+
+<table>
+	<tr>
+		<td>
+			<select id="hostgroup" name="hostgroup" class="form-control"
+				onChange="getTaskLog_Status(this.value)">
+				<option value="0" selected>成功</option>
+				<option value="1">失败</option>
+			</select>
+		</td>
+	</tr>
+</table>
+
+<div class="table-responsive">
+	<table class="table table-striped">
+		<thead>
+			<tr>
+				<th>ID</th>
+				<th>任务ID</th>
+				<th>任务名称</th>
+				<th>任务状态</th>
+				<th>任务返回结果</th>
+				<th>主机名</th>
+				<th>主机组</th>
+				<th>创建时间</th>
+				<th>操作</th>
+			</tr>
+		</thead>
+		<tbody>
+
+			{% for d in data reversed%}
+			<tr>
+				<td>{{d.id}}</td>
+				<td>{{d.task_id}}</td>
+				<td>{{d.task_name}}</td>
+				<td>{{d.result}}</td>
+				<td>{{d.log|safe}}</td>
+				<td>{{d.hostname}}</td>
+				<td>{{d.groupname}}</td>
+				<td>{{d.date|date:"Y-m-d H:i:s"}}</td>
+				<td>
+					<a onclick='DeleteItem(this);' class='label label-danger''>删除</a>
+				</td>
+			</tr>
+			{% endfor %}
+
+		</tbody>
+
+		<tr>
+			<td>总记录数:{{ count }}</td>
+			<td>当前页数:{{ page_number }}</td>
+		</tr>
+	</table>
+</div>
+
+
+{{ page|safe }}
+
+
+<!-- 删除层开始 -->
+<div id='wpq-modal-del' class='wpq-modal hide'>
+	<div class='cancle' onclick='CancleShade();'>x</div>
+	<div class='title'>提示</div>
+	<form id='form1' class='form' method='post'
+		action='/task/del_task_log/'>
+		{% csrf_token %}
+		<div>
+			<input type='hidden' id='delnid' name='delnid' />
+			<input type='hidden' id='page_id2' name='page_id2' />
+			是否要删除？
+		</div>
+		<div class='bottom'>
+			<input type='submit' value='确定' />
+			<input type='button' value='关闭' onclick='CancleShade();' />
+		</div>
+	</form>
+</div>
+<!-- 删除层结束 -->
+
+<!-- 遮罩层开始 -->
+<div id='shade' class='shade hide'></div>
+<!-- 遮罩层结束 -->
+
+
+
+
+{% endblock %} {% block task_js %}
+
+<script>
+		$(document).ready(function() {
+		
+			$("[href='/task/task_create']").parent().removeClass('active');
+			$("[href='/task/task_log']").parent().addClass('active');
+			$("[href='/task/task_detail']").parent().removeClass('active');
+		
+		});
+		
+
+	
+		
+		
+		$(function(){
+			$.validate('#form');
+		})
+		
+		
+		
+		function DeleteItem(arg){
+			var data = []
+			var others = $(arg).parent().prevAll();
+			$.each(others,function(i,value){
+				data.push($(value).text());
+			})
+			data = data.reverse()
+		
+			$('#delnid').val(data[0])
+			$('#page_id2').val({{ page_number }});
+			$('#wpq-modal-del,#shade').removeClass('hide');
+			
+			
+		}
+		
+		function getTaskLog_Status(arg){
+	        $.ajax({
+	            type: "GET",
+	            url: "/task/task_log/?status_id="+arg 
+	    	});
+		}
+		
+		
+		
+		
+		
+	</script>
+
+
+
+{% endblock %}
+
+
+
+
+
+

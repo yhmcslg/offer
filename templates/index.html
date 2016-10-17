@@ -1,0 +1,20 @@
+{% extends 'master/layout.html' %}
+
+{% block user %}
+	
+		{{ username }} -- {{ user_type }}
+	
+{% endblock %}
+
+{% block js %}
+	<script>
+				$(document).ready(function() {
+			
+				$("#index").css({
+					"color" : "red",
+					"font-size" : "20px"
+				});
+			});
+	</script>
+{% endblock %}
+

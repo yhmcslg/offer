@@ -52,7 +52,7 @@ q = []
 def ssh2(ip,hostname,port,username,cmd_content,files,login_username):
     content = ''
 
-    dir_name = os.path.join(BASE_DIR,'upload',username)
+    dir_name = os.path.join(BASE_DIR,'upload',login_username)
     
     if not os.path.exists(dir_name):
         os.mkdir(dir_name)  
@@ -71,7 +71,7 @@ def ssh2(ip,hostname,port,username,cmd_content,files,login_username):
         a = []    
                 
         for i in upload_filename:
-            a.append(os.path.join('/tmp','upload',username,i))
+            a.append(os.path.join('/tmp','upload',login_username,i))
             
             
     try:
@@ -79,17 +79,9 @@ def ssh2(ip,hostname,port,username,cmd_content,files,login_username):
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         
         try:
-            ssh.connect(ip,port,username,key_filename='D:\Documents\Identity',timeout=1)
+            ssh.connect(ip,port,username,key_filename='D:\Documents\Identity',timeout=2)
             
-            if u_s == u'普通运维':
-                print '1'
-                stdin, stdout, stderr = ssh.exec_command('/bin/rm -rf /usr/custom;/bin/mkdir -p /usr/custom_bin;/bin/cp -a   /bin/df /usr/custom_bin; export PATH=/usr/custom_bin;%s'%cmd_content)       
-            elif u_s == u'中级运维':
-                print '2'
-                stdin, stdout, stderr = ssh.exec_command('/bin/rm -rf /usr/custom;/bin/mkdir -p /usr/custom_bin;/bin/cp -a  /bin/df /sbin/ifconfig /sbin/ip /usr/bin/vmstat /usr/bin/dstat /usr/custom_bin;export PATH=/usr/custom_bin;%s'%cmd_content)
-            else:
-                print '3'
-                stdin, stdout, stderr = ssh.exec_command(cmd_content)  
+            stdin, stdout, stderr = ssh.exec_command(cmd_content)  
     
             std_out = stdout.readlines()
     
@@ -106,20 +98,21 @@ def ssh2(ip,hostname,port,username,cmd_content,files,login_username):
                     
             else:
                 std_err = stderr.readlines()
-                std_err.insert(0,"<font color='red'>"+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")+"<br/>"+hostname+":</font>  <br/>")
-                print '222:',std_err
-                std_err.append('-'*100+" <br/>")
-                content += std_err[0]
-                for s in std_err[1:]:
-                    s = s.replace("\n","<br/>")
-                    s = s.replace(" ","&nbsp;")
-                    s = s.replace("\x1b[7l","")
-    
-                    content += s  
-            
+                if std_err:
+                    std_err.insert(0,"<font color='red'>"+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")+"<br/>"+hostname+":</font>  <br/>")
+                    print '222:',std_err
+                    std_err.append('-'*100+" <br/>")
+                    content += std_err[0]
+                    for s in std_err[1:]:
+                        s = s.replace("\n","<br/>")
+                        s = s.replace(" ","&nbsp;")
+                        s = s.replace("\x1b[7l","")
+        
+                        content += s  
+                
         except Exception,e:
             print e
-            content += 'ip:%s connection failed...............'%ip
+            content += 'ip:%s connection failed...............<br />'%ip
         
         
           
@@ -134,7 +127,7 @@ def ssh2(ip,hostname,port,username,cmd_content,files,login_username):
            
             sftp = paramiko.SFTPClient.from_transport(t)
            
-            remote_upload_dirname = os.path.join('/tmp','upload',username)
+            remote_upload_dirname = os.path.join('/tmp','upload',login_username)
             remote_upload_dirname = remote_upload_dirname.replace('\\','/')
             stdin, stdout, stderr = ssh.exec_command('ls -ld %s'%remote_upload_dirname.replace('\\','/'))
            
@@ -164,6 +157,13 @@ def ssh2(ip,hostname,port,username,cmd_content,files,login_username):
 def cmd_run(request):
     username = request.COOKIES.get('username_password').split('&')[0]
     
+    u_s = models.AdminInfo.objects.select_related().get(username=username).user_info.user_type.caption
+    
+    if u_s == u'普通运维':
+        username_s = 'level1'
+    else:
+        username_s = 'level2'
+    
     if request.method == "POST":
         host_ids = request.POST.getlist('host_id[]')
         hostgroup_ids = request.POST.getlist('hostgroup_id[]')
@@ -181,7 +181,7 @@ def cmd_run(request):
             for host in host_ids:
                 host = models.Host.objects.get(id=host)
 
-                th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,'root',cmd_content,request.FILES,username))
+                th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username))
                 ths.append(th)
 
             for i in ths:
@@ -213,7 +213,7 @@ def cmd_run(request):
                 if hostgroup == 0:
                     hosts = models.Host.objects.filter(status=models.HostStatus.objects.get(name='online'))
                     for host in hosts:
-                        th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,'root',cmd_content,request.FILES,username))
+                        th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username))
                         ths.append(th)
 
                     for i in ths:
@@ -224,7 +224,7 @@ def cmd_run(request):
   
                 else:
                     for host in models.Host.objects.filter(hostgroup=models.HostGroup.objects.get(id=hostgroup),status=models.HostStatus.objects.get(name='online')):
-                        th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,'root',cmd_content,request.FILES,username))
+                        th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username))
                         ths.append(th)
                         
                     for i in ths:
@@ -242,15 +242,290 @@ def cmd_run(request):
             contents +=  q.pop()
             print '222:',contents      
                             
-        return HttpResponse(contents)               
+        return HttpResponse(contents)                
+    else:
+        return HttpResponse('请选择主机组或主机<br/>')   
+    
+    
+@login_dresser  
+def nt_floor(request):
+    username = request.COOKIES.get('username_password').split('&')[0]
+    
+    u_s = models.AdminInfo.objects.select_related().get(username=username).user_info.user_type.caption
+    
+    if u_s == u'普通运维':
+        username_s = 'level1'
+    else:
+        username_s = 'level2'
+      
+    username_s = 'root'
+        
+    if request.method == "POST":
+        host_ids = request.POST.getlist('host_id[]')
+        hostgroup_ids = request.POST.getlist('hostgroup_id[]')
+        
+
+    # cmd_content = '''
+    #    netstat -ntu |grep -Ev '127.0.0|172.16|192.168' |  awk '{print $5}' | cut -d: -f1 | sed -n '/[0-9]/p' | sort | uniq -c | sort -nr |awk '{if($1>100) system("iptables -I " $2 " --dport 80 -j DROP")}'
+    #'''
+    
+    cmd_content = '''
+        netstat -ntu |grep -Ev '127.0.0|172.16|192.168' |  awk '{print $5}' | cut -d: -f1 | sed -n '/[0-9]/p' | sort | uniq -c | sort -nr |head -n 20
+    '''
+    
+    if host_ids:
+        contents = ''
+        ths = []
+        for host in host_ids:
+            host = models.Host.objects.get(id=host)
+
+            th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username))
+            ths.append(th)
+
+        for i in ths:
+            i.setDaemon(False)    
+            i.start()
+        for i in ths:    
+            i.join()  
+                    
+            contents = ''
+            
+            q.reverse()
+           
+            for j in range(len(q)):
+                contents +=  q.pop()
+                print contents 
+            return HttpResponse(contents) 
+           
+    elif hostgroup_ids:
+        
+        ths = []
+        global q 
+        q = []
+        for hostgroup in hostgroup_ids:
+            hostgroup = int(hostgroup)
+            if hostgroup == 0:
+                hosts = models.Host.objects.filter(status=models.HostStatus.objects.get(name='online'))
+                for host in hosts:
+                    th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username))
+                    ths.append(th)
+
+                for i in ths:
+                    i.setDaemon(False)    
+                    i.start()
+                for i in ths:    
+                    i.join()  
+
+            else:
+                for host in models.Host.objects.filter(hostgroup=models.HostGroup.objects.get(id=hostgroup),status=models.HostStatus.objects.get(name='online')):
+                    th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username))
+                    ths.append(th)
+                    
+                for i in ths:
+                    i.setDaemon(False)    
+                    i.start()
+                for i in ths:    
+                    i.join()    
+            
+        contents = ''
+        
+        q.reverse()
+       
+        
+        for j in range(len(q)):
+            contents +=  q.pop()
+             
+        return HttpResponse(contents)        
         
     else:
-        return HttpResponse('请选择主机组或主机<br/>')    
+        return HttpResponse('请选择主机组或主机<br/>')       
+        
+  
+@login_dresser  
+def pic_floor(request):
+    username = request.COOKIES.get('username_password').split('&')[0]
+    
+    u_s = models.AdminInfo.objects.select_related().get(username=username).user_info.user_type.caption
+    
+    if u_s == u'普通运维':
+        username_s = 'level1'
+    else:
+        username_s = 'level2'
+        
+    if request.method == "POST":
+        host_ids = request.POST.getlist('host_id[]')
+        hostgroup_ids = request.POST.getlist('hostgroup_id[]')
+        
+    username_s = 'root'    
+
+    cmd_content = '''
+        echo "最大的前10个文件:"
+        cat   /var/log/nginx/access.log|awk '{print $7,$10}'|sort -k 2 -nr|uniq -i|head -n 10;
+        echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>";
+        echo "访问量最多前10个文件:";
+        cat  /var/log/nginx/access.log|awk  '{a[$7]+=$10}END{for(i in a){print i,a[i]}}'|sort -k 2 -nr|head -n 10;
+        echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>";
+        echo "访问次数最多的10个文件:";
+        cat   /var/log/nginx/access.log|awk '{print $7}'|uniq -c|sort -k1 -nr|head -n 10;
+    '''
+    
+    if host_ids:
+        contents = ''
+        ths = []
+        for host in host_ids:
+            host = models.Host.objects.get(id=host)
+
+            th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username))
+            ths.append(th)
+
+        for i in ths:
+            i.setDaemon(False)    
+            i.start()
+        for i in ths:    
+            i.join()  
+                    
+            contents = ''
+            
+            q.reverse()
+           
+            for j in range(len(q)):
+                contents +=  q.pop()
+                print contents 
+            return HttpResponse(contents) 
+           
+    elif hostgroup_ids:
+        
+        ths = []
+        global q 
+        q = []
+        for hostgroup in hostgroup_ids:
+            hostgroup = int(hostgroup)
+            if hostgroup == 0:
+                hosts = models.Host.objects.filter(status=models.HostStatus.objects.get(name='online'))
+                for host in hosts:
+                    th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username))
+                    ths.append(th)
+
+                for i in ths:
+                    i.setDaemon(False)    
+                    i.start()
+                for i in ths:    
+                    i.join()  
+
+            else:
+                for host in models.Host.objects.filter(hostgroup=models.HostGroup.objects.get(id=hostgroup),status=models.HostStatus.objects.get(name='online')):
+                    th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username))
+                    ths.append(th)
+                    
+                for i in ths:
+                    i.setDaemon(False)    
+                    i.start()
+                for i in ths:    
+                    i.join()    
+            
+        contents = ''
+        
+        q.reverse()
+       
+        
+        for j in range(len(q)):
+            contents +=  q.pop()
+             
+        return HttpResponse(contents)        
+        
+    else:
+        return HttpResponse('请选择主机组或主机<br/>') 
         
         
+   
+@login_dresser  
+def web_floor(request):
+    username = request.COOKIES.get('username_password').split('&')[0]
+    
+    u_s = models.AdminInfo.objects.select_related().get(username=username).user_info.user_type.caption
+    
+    if u_s == u'普通运维':
+        username_s = 'level1'
+    else:
+        username_s = 'level2'
         
+    if request.method == "POST":
+        host_ids = request.POST.getlist('host_id[]')
+        hostgroup_ids = request.POST.getlist('hostgroup_id[]')
         
+    username_s = 'root'
+    
+    cmd_content = '''
+        awk  '/%s\/%s\/2016/{++S[$1]} END {for(a in S) print a, S[a]}'  /var/log/nginx/access.log|sort -k 2 -nr
+    '''%(datetime.datetime.now().strftime('%d'),datetime.datetime.now().strftime('%b'))
+    
+    if host_ids:
+        contents = ''
+        ths = []
+        for host in host_ids:
+            host = models.Host.objects.get(id=host)
+
+            th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username))
+            ths.append(th)
+
+        for i in ths:
+            i.setDaemon(False)    
+            i.start()
+        for i in ths:    
+            i.join()  
+                    
+            contents = ''
+            
+            q.reverse()
+           
+            for j in range(len(q)):
+                contents +=  q.pop()
+                print contents 
+            return HttpResponse(contents) 
+           
+    elif hostgroup_ids:
         
+        ths = []
+        global q 
+        q = []
+        for hostgroup in hostgroup_ids:
+            hostgroup = int(hostgroup)
+            if hostgroup == 0:
+                hosts = models.Host.objects.filter(status=models.HostStatus.objects.get(name='online'))
+                for host in hosts:
+                    th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username))
+                    ths.append(th)
+
+                for i in ths:
+                    i.setDaemon(False)    
+                    i.start()
+                for i in ths:    
+                    i.join()  
+
+            else:
+                for host in models.Host.objects.filter(hostgroup=models.HostGroup.objects.get(id=hostgroup),status=models.HostStatus.objects.get(name='online')):
+                    th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username))
+                    ths.append(th)
+                    
+                for i in ths:
+                    i.setDaemon(False)    
+                    i.start()
+                for i in ths:    
+                    i.join()    
+            
+        contents = ''
+        
+        q.reverse()
+       
+        
+        for j in range(len(q)):
+            contents +=  q.pop()
+             
+        return HttpResponse(contents)        
+        
+    else:
+        return HttpResponse('请选择主机组或主机<br/>')      
+   
         
         
         

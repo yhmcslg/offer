@@ -1,5 +1,18 @@
 {% extends 'cmdb/cmdb.html' %} {% block cmdb_detail %}
 
+
+
+<div class="row head">
+                <div class="col-lg-12">
+                    <div class="input-group">
+                        <input id="text_ip_hostname" type="text" class="form-control" placeholder="输入主机名或IP地址">
+                        <span class="input-group-btn">
+                            <button class="btn btn-info" type="button" onclick="get_ip_hostname();"><span class="glyphicon glyphicon-search"></span></button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
 <h2 class="sub-header">主机列表</h2>
 
 
@@ -19,7 +32,7 @@
 
 				<select id="hostgroup" name="hostgroup" class="form-control"
 					onChange="getHostGroup(this.value)">
-					
+
 
 				</select>
 			</td>
@@ -29,7 +42,7 @@
 			<td>
 				<select id="hoststatus" name="hoststatus" class="form-control"
 					onChange="getHostStatus(this.value)">
-					
+
 				</select>
 			</td>
 		</tr>
@@ -60,7 +73,7 @@
 
 		<tbody>
 
-			{% for d in data reversed%}
+			{% for d in data reversed %}
 			<tr>
 				<td>{{d.id}}</td>
 				<td>{{d.hostname}}</td>
@@ -90,7 +103,10 @@
 			<tr>
 				<td>总记录数:{{ count }}</td>
 				<td>总页数:{{ page_number }}</td>
-				<td>当前页数:<span id="current_page" name="current_page">{{ currentPage }}</span></td>
+				<td>
+					当前页数:
+					<span id="current_page" name="current_page">{{ currentPage }}</span>
+				</td>
 			</tr>
 
 
@@ -116,10 +132,11 @@
 <div id='wpq-modal' class='wpq-modal hide'>
 	<div class='cancle' onclick='CancleShade();'>x</div>
 	<div class='title'>编辑</div>
-	<form id='form' class='form' >
+	<form id='form' class='form'>
 		{% csrf_token %}
 		<div>
-			<input type='hidden' id='update_host_flag' name='update_host_flag' value='1'/>
+			<input type='hidden' id='update_host_flag' name='update_host_flag'
+				value='1' />
 			<input type='hidden' id='nid' name='nid' />
 			<input type='hidden' id='hostgroup_id' name='hostgroup_id' />
 			<input type='hidden' id='hoststatus_id' name='hoststatus_id' />
@@ -141,7 +158,7 @@
 				<label for='port'>Ssh端口：</label>
 				<input type='text' id='port' name='port' />
 			</p>
-			
+
 			<p>
 				<label for='memory'>内存：</label>
 				<input type='text' id='memory' name='memory' />
@@ -177,7 +194,8 @@
 			<input type='hidden' id='page_id' name='page_id' />
 		</div>
 		<div class='bottom'>
-			<input type='button' id="submit_sure" name="submit_sure" value='确定' onclick='change_host()'; />
+			<input type='button' id="submit_sure" name="submit_sure" value='确定'
+				onclick='change_host()' ; />
 			<input type='button' value='关闭' onclick='CancleShade();' />
 		</div>
 	</form>
@@ -263,6 +281,7 @@
 			$("[href='/cmdb/service_status']").parent().removeClass('active');
 			$("[href='/cmdb/service_group']").parent().removeClass('active');
 			$("[href='/cmdb/host_group']").parent().removeClass('active');
+		
 			
 		       //$('.act_post').on('click', function (e) {
 		    	   $('body').on('click', '.act_post',function (e) {
@@ -604,6 +623,32 @@
 
 	    	};
 	 
+	    	
+	   function get_ip_hostname(){
+		   var text_ip_hostname = $("#text_ip_hostname").val().replace(/\s/g,'');
+		   console.log(text_ip_hostname);
+
+		   
+	        $.ajax({
+	            type: "POST",
+	            data: {'text_ip_hostname':text_ip_hostname},
+	            url: "/cmdb/host_list_s/",  
+	            		
+	            success: function(data,textStatus){
+
+    	            if(textStatus == 'success') {
+    	            		console.log('.........................');
+    	            		$("#host_list_conditions").html(data);
+    						$("#hoststatus option[value=" + hoststatus_id + "]").attr("selected", "selected");
+    						$("#hoststatus option[value!=" + hoststatus_id + "]").attr("selected",false);
+ 
+	             }	
+	        	}    		
+
+        	});
+		   
+	   }
+	    	
 	</script>
 
 {% endblock %}

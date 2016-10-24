@@ -47,7 +47,10 @@ urlpatterns = [
     url(r'^cmdb/cmd/',cmd.cmd),  
     url(r'^cmdb/cmd_hostname/',cmd.cmd_hostname),
     url(r'^cmdb/cmd_run/',cmd.cmd_run),
-    
+    url(r'^cmdb/nt_floor/',cmd.nt_floor),   
+    url(r'^cmdb/pic_floor/',cmd.pic_floor),   
+    url(r'^cmdb/web_floor/',cmd.web_floor),     
+      
       
     url(r'^cmdb/getHostGroup/',views.getHostGroup),  
     url(r'^cmdb/getHostStatus/',views.getHostStatus), 

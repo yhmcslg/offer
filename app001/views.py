@@ -22,6 +22,7 @@ import datetime
 from third import html_helper_bootstarp
 from third import common
 
+from django.db.models import Q
 
 from django.db import connection,transaction
 
@@ -552,7 +553,8 @@ def del_host(request):
         
     return redirect('/cmdb/host_list/%d'%int(page_id))
     
-    
+import time
+   
 @login_dresser
 def host_list(request):
     page = 1
@@ -576,6 +578,9 @@ def host_list(request):
         if hoststatus_id:
             hoststatus_id = int(hoststatus_id)
 
+
+        text_ip_hostname = request.POST.get("text_ip_hostname")    
+
     else:
         page =  request.GET.get('page_id')
         page = common.try_int(page,1)
@@ -590,6 +595,8 @@ def host_list(request):
     
         if hoststatus_id:
             hoststatus_id = int(hoststatus_id)        
+
+    
             
     if host_group_id and hoststatus_id:
         count = models.Host.objects.filter(hostgroup_id=host_group_id,status_id=hoststatus_id).count()
@@ -669,6 +676,8 @@ def host_list_s(request):
     
         update_host_flag = request.POST.get("update_host_flag")
     
+        text_ip_hostname = request.POST.get('text_ip_hostname')
+    
     if host_group_id:
         host_group_id = int(host_group_id)   
 
@@ -710,6 +719,78 @@ def host_list_s(request):
         except Exception,e:
             print e 
 
+     
+    if text_ip_hostname:
+        
+        count = 1
+
+        pageObj = html_helper_bootstarp.PageInfo(page,count,peritems=2)
+
+
+        results = models.Host.objects.filter(Q(hostname = text_ip_hostname) | Q(lan_ip = text_ip_hostname))
+ 
+        str1 = '''
+                <div id="host_list_conditions" class="table-responsive">
+                <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>主机名</th>
+                        <th>内网IP</th>
+                        <th>外网IP</th>
+                        <th>Ssh端口</th>
+                        <th>内存</th>
+                        <th>CPU</th>
+                        <th>品牌型号</th>
+                        <th>操作系统</th>
+                        <th>状态</th>
+                        <th>主机组</th>
+                        <th>创建时间</th>
+                        <th>更新时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <div  >    <tbody>'''
+        
+        for result in results:
+            s = ''
+            if result.status.name == 'online':
+                s = '<td class="success">%s</td>'%result.status
+            else:
+                s = '<td class="danger">%s</td>'%result.status
+             
+            if not result.wan_ip:
+                result.wan_ip = ''
+                  
+              
+            str2='''<tr>
+                <td>%s</td>
+                <td>%s</td>
+                <td>%s</td>
+                <td>%s</td>
+                <td>%d</td>
+                <td>%s</td>
+                <td>%s</td>
+                <td>%s</td>
+                <td>%s</td>
+                %s
+                <td>%s</td>
+                <td>%s</td>
+                <td>%s</td>
+                <td>
+                    <a onclick='EditItem(this);' class='label label-success'>编辑</a>
+                    <a onclick='DeleteItem(this);' class='label label-danger''>删除</a
+                </td>
+            </tr>
+            '''%(result.id,result.hostname,result.lan_ip,result.wan_ip,result.port,result.memory,result.cpu,result.brand,result.os,s,result.hostgroup,result.create_at,result.update_at)
+            str1 = str1 +  str(str2)    
+            
+        
+       
+  
+        return HttpResponse(str1)
+     
+     
      
     if host_group_id and hoststatus_id:
 

@@ -9,6 +9,8 @@
 
 <script src="/static/js/pace.min.js"></script>
 
+<link  href="/static/css/bootstrap-datetimepicker.min.css" rel="stylesheet" type="text/css">
+
 {% endblock %} {% block cmdb_detail %}
 
 <div id="systemWorking"
@@ -69,7 +71,6 @@
 
 					<tr>
 						<td>
-
 							<select name="host_ip" id="host_ip" class="sys_server_select"
 								size="40" multiple>
 								<!--			<option value="-1"><-请选择主机-></option> -->
@@ -104,6 +105,9 @@
 												&nbsp;&nbsp;	
 											<input type="button" name="Submit_ref5"  value="Web Floor"
 												id="sys_run_button" onClick="return web_floor();">
+												&nbsp;&nbsp;
+											<input type="button" name="Submit_ref6"  value="MySQL 回档"
+												id="sys_run_button" onClick="return mysql_return();">
 												&nbsp;&nbsp;		
 											<input type="button" name="Submit_add" value="添加模块"
 												id="sys_add_button"
@@ -126,8 +130,8 @@
 		<tr>
 			<td height="4" valign="top" bgcolor="#eeeeee"></td>
 		</tr>
+		
 		<tr>
-
 			<td valign="top" align="center" bgcolor="#030303">
 				<table width="99%" border="0" cellspacing="100" cellpadding="0"
 					bgcolor="#000000">
@@ -165,6 +169,8 @@
 
 <script src="/static/plugins/bootstrap-select/bootstrap-select.min.js"></script>
 
+<script src="/static/js/bootstrap-datetimepicker.min.js"></script>
+
 <script>
 	$(function() {
 		$("[href='/cmdb/create_host']").parent().removeClass('active');
@@ -173,6 +179,7 @@
 		$("[href='/cmdb/host_group_list']").parent().removeClass('active');
 		$("[href='/cmdb/cmd']").parent().addClass('active');
 
+		
 		$.ajax({
 					type : "POST",
 					url : "/cmdb/getHostGroup/",
@@ -341,6 +348,16 @@
 		var hostgroup_id = $("#hostgroup_name").val();
 		var host_id = $("#host_ip").val();
 		
+        if(undefined == hostgroup_id || '' == hostgroup_id){
+            hostgroup_id = -1;
+        }
+		
+		if(hostgroup_id <0){
+			var content = $("#ajaxmodulerunresult").html();
+			$("#ajaxmodulerunresult").html("请选择主机组或主机<br />" + content);
+			return false;
+		}
+		
 		$.ajax({
 			type : "POST",
 			data : {
@@ -365,7 +382,19 @@
 	
 	function pic_floor() {
 		var hostgroup_id = $("#hostgroup_name").val();
+		
 		var host_id = $("#host_ip").val();
+		
+        if(undefined == hostgroup_id || '' == hostgroup_id){
+            hostgroup_id = -1;
+        }
+        
+		if(hostgroup_id <0){
+			var content = $("#ajaxmodulerunresult").html();
+			$("#ajaxmodulerunresult").html("请选择主机组或主机<br />" + content);
+			return false;
+		}
+		
 		
 		$.ajax({
 			type : "POST",
@@ -394,7 +423,18 @@
 	
 	function web_floor() {
 		var hostgroup_id = $("#hostgroup_name").val();
+		
 		var host_id = $("#host_ip").val();
+		
+        if(undefined == hostgroup_id || '' == hostgroup_id){
+            hostgroup_id = -1;
+        }
+		
+		if(hostgroup_id <0){
+			var content = $("#ajaxmodulerunresult").html();
+			$("#ajaxmodulerunresult").html("请选择主机组或主机<br />" + content);
+			return false;
+		}
 		
 		$.ajax({
 			type : "POST",
@@ -417,6 +457,51 @@
 
 		});
 	};	
+	
+	
+	
+	function mysql_return(){
+		var hostgroup_id = $("#hostgroup_name").val();
+		
+		var host_id = $("#host_ip").val();
+		
+		var cmd_content = $("#text_cmd").val();
+		
+        if(undefined == hostgroup_id || '' == hostgroup_id){
+            hostgroup_id = -1;
+        }
+		
+		if(hostgroup_id <0){
+			var content = $("#ajaxmodulerunresult").html();
+			$("#ajaxmodulerunresult").html("请选择主机组或主机<br />" + content);
+			return false;
+		}
+		
+		
+		$.ajax({
+			type : "POST",
+			data : {
+				'hostgroup_id' : hostgroup_id,
+				'host_id' : host_id,
+				'stop_time' : cmd_content,
+			},
+			url : "/cmdb/mysql_return/",
+			success : function(data, textStatus) {
+				console.log(data);
+				if (textStatus == 'success') {
+					//$("#ajaxmodulerunresult").empty();
+					if (data.length > 0) {
+						var content = $("#ajaxmodulerunresult").html();
+						$("#ajaxmodulerunresult").html(data + content);
+					}
+				}
+			}
+
+		});
+		
+	}
+	
+	
 	
 </script>
 

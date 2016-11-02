@@ -17,11 +17,13 @@ urlpatterns = [
     
     url(r'^logout/$',views.logout),
     
-    
+    url(r'^CheckOnLine/',views.CheckOnLine),
+     
     url(r'^test/(\d+)?',views.test),
     
     url(r'^user_info/$',views.user_info),
     
     url(r'^', include('app001.urls')),
+
 
 ]

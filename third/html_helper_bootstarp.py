@@ -65,9 +65,9 @@ def Custompager(baseurl,currentPage,totalpage):
     
     
         if currentPage > 10:
-            begin_two = 9
+            begin_two = 10
         if currentPage < totalpage - 10:
-            end_two = 9
+            end_two = 10
     
         pager_list = []
     

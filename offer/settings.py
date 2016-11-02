@@ -53,6 +53,8 @@ MIDDLEWARE_CLASSES = (
     #'login_mymiddleware.login.login',
 )
 
+#SESSION_ENGINE = 'django.contrib.sessions.backends.file'
+
 ROOT_URLCONF = 'offer.urls'
 
 TEMPLATES = [

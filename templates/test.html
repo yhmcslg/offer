@@ -1,84 +1,172 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="">
-<meta name="author" content="">
-<link rel="icon" href="../../favicon.ico">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico">
 
-<title>Dashboard Template for Bootstrap</title>
+    <title>Dashboard Template for Bootstrap</title>
 
-<!-- Bootstrap core CSS -->
-<link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
 
-<!-- Custom styles for this template -->
-<link href="/static/css/dashboard.css" rel="stylesheet">
+    <link href="/static/css/dashboard.css" rel="stylesheet">
+    
+    <link rel="stylesheet" href='/static/css/common.css' />
 
-<link rel="stylesheet" href='/static/css/common.css' />
-
-<!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
-<!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
-<script src="/static/js/ie-emulation-modes-warning.js"></script>
-
-<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-<!--[if lt IE 9]>
-      <script src="http://cdn.bootcss.com/html5shiv/3.7.0/html5shiv.js"></script>
-      <script src="http://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
+    <script src="/static/js/ie-emulation-modes-warning.js"></script>
 
 
+<link href="/static/css/common2.css" rel="stylesheet" type="text/css">
+
+<link href="/static/css/ymPrompt.css" rel="stylesheet" type="text/css">
+
+<link href="/static/css/smartMenu.css" rel="stylesheet" type="text/css">
+
+<link href="/static/css/pace.min.css" rel="stylesheet">
+
+<script src="/static/js/pace.min.js"></script>
+
+<link  href="/static/css/bootstrap-datetimepicker.min.css" rel="stylesheet" type="text/css">
+
+
+    
+  </head>
+
+  <body id='body'>
+
+   
+<p>日期：<input type="text" id="datepicker"></p>
+		
 
 
 
-</head>
-
-
-
-
-
-
-<input type="text"  placeholder="输入主机名或IP地址">
-
-<button  type="button"
-					onclick="get_ip_hostname();">
-					
-</button>
-
-
-<!-- Bootstrap core JavaScript
+    <!-- Bootstrap core JavaScript
     ================================================== -->
-<!-- Placed at the end of the document so the pages load faster -->
-<script src="/static/js/jquery-2.1.1.js"></script>
-<script src="/static/js/bootstrap.min.js"></script>
-<script src="/static/js/docs.min.js"></script>
-<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-<script src="/static/js/ie10-viewport-bug-workaround.js"></script>
-<script src="/static/js/jquery-ui.js"></script>
-<script src="/static/js/jquery-ui-timepicker-addon.js"></script>
-<script type='text/javascript' src='/static/js/wupeiqi.js'></script>
+    <!-- Placed at the end of the document so the pages load faster -->
+	<script src="/static/js/jquery-2.1.1.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/docs.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="/static/js/ie10-viewport-bug-workaround.js"></script>
+ 	<script src="/static/js/jquery-ui.js"></script>   
+    <script src="/static/js/jquery-ui-timepicker-addon.js"></script>
+    <script type='text/javascript' src='/static/js/wupeiqi.js'></script>
 
+	
+   
+    
 
+	<script>
 
+	
+				$(document).ready(function() {
+			
+				$("#cmdb").css({
+					"color" : "red",
+					"font-size" : "20px"
+				});
+			});
 
+	</script>
+	
+			
 
+<script src='/static/js/jquery-smartMenu.js'></script>
 
+<script src="/static/plugins/jquery-ui/jquery-ui.min.js"></script>
 
-<script type="text/javascript">
-	function get_ip_hostname() {
-		var text_ip_hostname = $("#text_ip_hostname").val().replace(/\s/g, '');
+<script src="/static/plugins/bootstrap-fileinput/js/fileinput.js"></script>
 
-		if ('' == hostgroup_id) {
-			$("#text_ip_hostname").html("主机名或IP地址不能为空");
-			return false;
-		}
+<script src="/static/plugins/bootstrap-select/bootstrap-select.min.js"></script>
 
+<script src="/static/js/bootstrap-datetimepicker.min.js"></script>
+
+<script>
+	$(function() {
+		$("[href='/cmdb/create_host']").parent().removeClass('active');
+		$("[href='/cmdb/host_group_create']").parent().removeClass('active');
+		$("[href='/cmdb/host_list']").parent().removeClass('active');
+		$("[href='/cmdb/host_group_list']").parent().removeClass('active');
+		$("[href='/cmdb/cmd']").parent().addClass('active');
+
+	    $( "#datepicker" ).datepicker({
+	        changeMonth: true,
+	        changeYear: true,
+
+	      });
+		
+		$.ajax({
+					type : "POST",
+					url : "/cmdb/getHostGroup/",
+					dataType : 'json',
+					success : function(data, textStatus) {
+						if (textStatus == 'success') {
+							$("#hostgroup_name").empty();
+							if (data.length > 0) {
+
+								for ( var i = 0; i < data.length; i++) {
+									var str1 = "<option value="+data[i].group_id+"><font class='baner_font'>"
+											+ data[i].group_name
+											+ "</font></option>";
+									$("#hostgroup_name").prepend(str1);
+									console.log(str1);
+								}
+								var str1 = "<option value=-1><font class='baner_font'><-选择主机组-></font></option>";
+								$("#hostgroup_name").prepend(str1);
+							}
+						}
+					}
+				});
+
+		var data = [ 
+		             [ {
+						text : "打开服务器",
+						func : function() {
+							var src = $(this).find('option:selected').text();
+							var ip = src.substring(src.indexOf("__") + 2);
+							window.open("https://" + ip + ":4200");
+						}
+					} ],
+		            [ {
+							text : "防攻击，关闭当前连接数超过100个链接的IP",
+							func : function() {
+								var src = $(this).find('option:selected').text();
+								var ip = src.substring(src.indexOf("__") + 2);
+								window.open("https://" + ip + ":4200");
+							}
+					} ],
+		            [ {
+						text : "防攻击，关闭当天访问Web服务次数过多的IP",
+						func : function() {
+							var src = $(this).find('option:selected').text();
+							var ip = src.substring(src.indexOf("__") + 2);
+							window.open("https://" + ip + ":4200");
+						}
+				} ],
+			]; 
+
+		$("#host_ip").mousedown(function(e) {
+			if (e.which == 3) {
+				$("#host_ip").smartMenu(data);
+			}
+		})
+
+		$("#host_ip").focus(function() {
+			$("#host_ip").css("background-color", "#FFFFCC");
+		})
+
+		$("#host_ip").blur(function() {
+			$("#host_ip").css("background-color", "#D6D6FF");
+		})
+
+	});
+
+	function change_moduleinfo(arg) {
 		$.ajax({
 			type : "POST",
-			data : {
-				'text_ip_hostname' : text_ip_hostname
-			},
 			url : "/cmdb/host_list_s/",
 
 			success : function(data, textStatus) {
@@ -96,10 +184,242 @@
 
 		});
 
+	};
+
+	function change_hostgroup(arg) {
+		$
+				.ajax({
+					type : "POST",
+					data : {
+						'hostgroup_id' : arg
+					},
+					url : "/cmdb/cmd_hostname/",
+
+					success : function(data, textStatus) {
+						if (textStatus == 'success') {
+							$("#host_ip").empty();
+							if (data.length > 0) {
+								var str1 = '';
+								for ( var i = 0; i < data.length; i++) {
+									if (data[i].wan_ip) {
+										var str1 = "<option value="+data[i].id+"><font class='baner_font'>"
+												+ data[i].hostname
+												+ "__"
+												+ data[i].wan_ip
+												+ "</font></option>";
+										$("#host_ip").prepend(str1);
+									} else {
+										var str1 = "<option value="+data[i].id+"><font class='baner_font'>"
+												+ data[i].hostname
+												+ "__"
+												+ data[i].lan_ip
+												+ "</font></option>";
+										$("#host_ip").prepend(str1);
+									}
+
+								}
+								//var str1 = "<option value=-1><font class='baner_font'><-选择主机-></font></option>";
+								//$("#host_ip").prepend(str1);
+							}
+						}
+					}
+
+				});
+
+	};
+
+	function subcmd() {
+		var hostgroup_id = $("#hostgroup_name").val();
+		var host_id = $("#host_ip").val();
+		var cmd_content = $("#text_cmd").val();
+		var files = $("#id_file").val()
+	
+		$.ajax({
+			type : "POST",
+			data : {
+				'hostgroup_id' : hostgroup_id,
+				'host_id' : host_id,
+				'cmd_content' : cmd_content,
+				'files': files
+			},
+			url : "/cmdb/cmd_run/",
+			success : function(data, textStatus) {
+				console.log(data);
+				if (textStatus == 'success') {
+					//$("#ajaxmodulerunresult").empty();
+					if (data.length > 0) {
+						var content = $("#ajaxmodulerunresult").html();
+						$("#ajaxmodulerunresult").html(data + content);
+					}
+				}
+			}
+
+		});
+	};
+
+	function clear_screen() {
+		$("#ajaxmodulerunresult").html('');
 	}
+	
+	
+	function nt_floor() {
+		var hostgroup_id = $("#hostgroup_name").val();
+		var host_id = $("#host_ip").val();
+		
+        if(undefined == hostgroup_id || '' == hostgroup_id){
+            hostgroup_id = -1;
+        }
+		
+		if(hostgroup_id <0){
+			var content = $("#ajaxmodulerunresult").html();
+			$("#ajaxmodulerunresult").html("请选择主机组或主机<br />" + content);
+			return false;
+		}
+		
+		$.ajax({
+			type : "POST",
+			data : {
+				'hostgroup_id' : hostgroup_id,
+				'host_id' : host_id,
+				
+			},
+			url : "/cmdb/nt_floor/",
+			success : function(data, textStatus) {
+				console.log(data);
+				if (textStatus == 'success') {
+					//$("#ajaxmodulerunresult").empty();
+					if (data.length > 0) {
+						var content = $("#ajaxmodulerunresult").html();
+						$("#ajaxmodulerunresult").html(data + content);
+					}
+				}
+			}
+
+		});
+	};
+	
+	function pic_floor() {
+		var hostgroup_id = $("#hostgroup_name").val();
+		
+		var host_id = $("#host_ip").val();
+		
+        if(undefined == hostgroup_id || '' == hostgroup_id){
+            hostgroup_id = -1;
+        }
+        
+		if(hostgroup_id <0){
+			var content = $("#ajaxmodulerunresult").html();
+			$("#ajaxmodulerunresult").html("请选择主机组或主机<br />" + content);
+			return false;
+		}
+		
+		
+		$.ajax({
+			type : "POST",
+			data : {
+				'hostgroup_id' : hostgroup_id,
+				'host_id' : host_id,
+				
+			},
+			url : "/cmdb/pic_floor/",
+			success : function(data, textStatus) {
+				console.log(data);
+				if (textStatus == 'success') {
+					//$("#ajaxmodulerunresult").empty();
+					if (data.length > 0) {
+						var content = $("#ajaxmodulerunresult").html();
+						$("#ajaxmodulerunresult").html(data + content);
+					}
+				}
+			}
+
+		});
+	};
+	
+	
+	
+	
+	function web_floor() {
+		var hostgroup_id = $("#hostgroup_name").val();
+		
+		var host_id = $("#host_ip").val();
+		
+        if(undefined == hostgroup_id || '' == hostgroup_id){
+            hostgroup_id = -1;
+        }
+		
+		if(hostgroup_id <0){
+			var content = $("#ajaxmodulerunresult").html();
+			$("#ajaxmodulerunresult").html("请选择主机组或主机<br />" + content);
+			return false;
+		}
+		
+		$.ajax({
+			type : "POST",
+			data : {
+				'hostgroup_id' : hostgroup_id,
+				'host_id' : host_id,
+				
+			},
+			url : "/cmdb/web_floor/",
+			success : function(data, textStatus) {
+				console.log(data);
+				if (textStatus == 'success') {
+					//$("#ajaxmodulerunresult").empty();
+					if (data.length > 0) {
+						var content = $("#ajaxmodulerunresult").html();
+						$("#ajaxmodulerunresult").html(data + content);
+					}
+				}
+			}
+
+		});
+	};	
+	
+	
+	
+	function mysql_return(){
+		var hostgroup_id = $("#hostgroup_name").val();
+		var host_id = $("#host_ip").val();
+		
+        if(undefined == hostgroup_id || '' == hostgroup_id){
+            hostgroup_id = -1;
+        }
+		
+		if(hostgroup_id <0){
+			var content = $("#ajaxmodulerunresult").html();
+			$("#ajaxmodulerunresult").html("请选择主机组或主机<br />" + content);
+			return false;
+		}
+		
+		
+		$.ajax({
+			type : "POST",
+			data : {
+				'hostgroup_id' : hostgroup_id,
+				'host_id' : host_id,
+			},
+			url : "/cmdb/mysql_return/",
+			success : function(data, textStatus) {
+				console.log(data);
+				if (textStatus == 'success') {
+					//$("#ajaxmodulerunresult").empty();
+					if (data.length > 0) {
+						var content = $("#ajaxmodulerunresult").html();
+						$("#ajaxmodulerunresult").html(data + content);
+					}
+				}
+			}
+
+		});
+		
+	}
+	
+	
+	
 </script>
 
 
 
-</body>
+  </body>
 </html>

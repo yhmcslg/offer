@@ -83,6 +83,12 @@ def login(request):
                 resp = HttpResponseRedirect('/index')
                 dt = datetime.datetime.now() + datetime.timedelta(hours = int(2))
                 resp.set_cookie('username_password','%s&%s'%(username,password),expires=dt)
+                
+                session_get_username = request.session.get(username,default=0)
+                
+                if not session_get_username:
+                    request.session[username] = 1
+                    
                 return resp
                 
             else:
@@ -92,15 +98,30 @@ def login(request):
 
 
 def logout(request):
+    try:
+        username = request.COOKIES.get('username_password').split('&')[0]
+        del request.session[username]
+    except KeyError:
+        pass
+    
     resp = HttpResponseRedirect('/login')
     if request.COOKIES.get('username_password'):
         resp.delete_cookie('username_password')
     return resp
 
+def CheckOnLine(request):
+    c = {}
+    
+    username = request.COOKIES.get('username_password').split('&')[0]
+    
+    is_login  = request.session.get(username,default=None)
 
+    c['Result'] = is_login
+    c['sessionid'] = request.COOKIES.get('sessionid')
+       
+    return HttpResponse(json.dumps(c),content_type="application/json")
 
-def test(request,id):
-      
+def test(request,id):  
     if request.method == 'POST':
         return HttpResponse(json.dumps(id),content_type="application/json")
     else:
@@ -398,14 +419,16 @@ def new_task(request):
 def task_detail(request,page):
     username = request.COOKIES.get('username_password').split('&')[0]
     
+    page = request.GET.get('page_id')
+    
     form = forms.TaskForm()
     #task_list = models.TaskCenter.objects.all()
 
     page = common.try_int(page,1)
-
+    
     count = models.Task.objects.all().count()
 
-    pageObj = html_helper_bootstarp.PageInfo(page,count,peritems=10)
+    pageObj = html_helper_bootstarp.PageInfo(page,count,peritems=2)
 
     result = models.Task.objects.all().order_by('-id')[pageObj.From:pageObj.To]
 
@@ -434,7 +457,7 @@ def task_detail(request,page):
                      'total_tasks':models.TaskHostStatus.objects.filter(task_id=task.id).count(),
                      'failure':models.TaskLog.objects.filter(task_id=task.id,result='failed').count(),
                      'success':models.TaskLog.objects.filter(task_id=task.id,result='success').count(),
-                     }
+                    }
     
         task_list.append(task_info)
         

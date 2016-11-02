@@ -258,6 +258,33 @@
     <script src="/static/js/jquery-ui-timepicker-addon.js"></script>
     <script type='text/javascript' src='/static/js/wupeiqi.js'></script>
 
+	<script>
+	    window.setInterval(CheckOnLine, 15000);
+	    function CheckOnLine() {
+	        $.ajax({
+	            url: "/CheckOnLine/",
+	            data: "",
+	            type: "POST",
+	            success: function (data) {
+	                if (data.Result == 0) {
+	                	console.log('111111111111111111111111111');
+	                    alert("系统提示", "你的帐号已在别处登陆，你被强迫下线！", "error", function () {
+	
+	                        location.href = '/login/';
+	                    });
+	
+	                }
+	
+	            },
+	            error: function () {
+	                $.messager.alert("系统提示", "网络异常，请刷新重试", "error");
+	            }
+	
+	        });
+	
+	    }
+	
+	</script>
 	
    
     {% block js %}

@@ -31,8 +31,12 @@ from django.db import connection,transaction
 
 @login_dresser
 def cmd(request):
-    
     return render_to_response('cmdb/cmd.html',context_instance=RequestContext(request))
+
+
+@login_dresser
+def cmd_code_release(request):
+    return render_to_response('cmdb/code_release.html',context_instance=RequestContext(request))
 
 
 def cmd_hostname(request):
@@ -117,7 +121,7 @@ def ssh2(ip,hostname,port,username,cmd_content,files,login_username,hostgroup_id
             std_out = stdout.readlines()
     
             std_err = stderr.readlines()
-            
+
             if  std_out:
                 sql = 'update taskhoststatus set status=1 where id=%d'%task_id
                 cursor.execute(sql)
@@ -137,7 +141,12 @@ def ssh2(ip,hostname,port,username,cmd_content,files,login_username,hostgroup_id
                     content += s
                     
             elif std_err:
-                sql = 'insert into tasklog(result,log,host_id,date,task_id) values("%s","%s",%d,"%s",%d)'%('failed',stderr,host_name_id,datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),task_id)
+                std_errs = ''
+                
+                for err in std_err:
+                    std_errs += err
+                
+                sql = 'insert into tasklog(result,log,host_id,date,task_id) values("%s","%s",%d,"%s",%d)'%('failed',std_errs,host_name_id,datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),task_id)
                 cursor.execute(sql)    
                                 
                 std_err.insert(0,"<font color='red'>"+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")+"<br/>"+hostname+":</font>  <br/>")
@@ -160,6 +169,7 @@ def ssh2(ip,hostname,port,username,cmd_content,files,login_username,hostgroup_id
                 
                 
         except Exception,e:
+            print '444:'
             sql = 'insert into tasklog(result,log,host_id,date,task_id) values("%s","%s",%d,"%s",%d)'%('failed',[str(e)],host_name_id,datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),task_id)
             cursor.execute(sql) 
             content = str(e)
@@ -220,7 +230,10 @@ def cmd_run(request):
     
     if request.method == "POST":
         host_ids = request.POST.getlist('host_id[]')
-        hostgroup_ids = request.POST.getlist('hostgroup_id[]')[0]
+        hostgroup_ids = request.POST.getlist('hostgroup_id[]')
+        if hostgroup_ids:
+            hostgroup_ids = hostgroup_ids[0]
+            
         cmd_content = str(request.POST.get('cmd_content'))
 
 
@@ -299,8 +312,115 @@ def cmd_run(request):
         return HttpResponse(contents)                
     else:
         return HttpResponse('请选择主机组或主机<br/>')   
- 
- 
+
+@login_dresser
+def update_svn(request):
+    username = request.COOKIES.get('username_password').split('&')[0]
+    
+    u_s = models.AdminInfo.objects.select_related().get(username=username).user_info.user_type.caption
+    
+    if u_s == u'普通运维':
+        username_s = 'level1'
+    else:
+        username_s = 'level2'
+    
+    username_s = 'root'
+    
+    if request.method == "POST":
+        host_ids = request.POST.getlist('host_id[]')
+        hostgroup_ids = request.POST.getlist('hostgroup_id[]')
+        if hostgroup_ids:
+            hostgroup_ids = hostgroup_ids[0]
+            
+        change_code_url = request.POST.get('change_code_url')
+        
+        target_path_name = request.POST.get('target_path_name')
+
+
+    cmd_content = ' if [ ! -d %s ];then mkdir -p %s;fi; svn info %s >/dev/null 2>&1 ;if [ $? -ne 0 ];then  svn co %s %s ;else  svn update %s ;fi'%(target_path_name,target_path_name,target_path_name,change_code_url,target_path_name,target_path_name)
+
+
+    if host_ids:
+        if len(host_ids) == 1 and host_ids[0] == -1:
+            return HttpResponse('请选择要执行命令的主机<br/>')
+        elif not  target_path_name :
+            return HttpResponse('请输入远端地址<br/>')
+        elif not change_code_url:
+            return HttpResponse('请选择SVN地址<br/>')
+        else:
+            contents = ''
+            ths = []
+            for host in host_ids:
+                host = models.Host.objects.get(id=host)
+
+                th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username,hostgroup_ids))
+                ths.append(th)
+
+            for i in ths:
+                i.setDaemon(False)    
+                i.start()
+            for i in ths:    
+                i.join()  
+                
+        contents = ''
+        
+        q.reverse()
+       
+        for j in range(len(q)):
+            contents +=  q.pop()
+            print contents 
+        return HttpResponse(contents) 
+           
+    elif hostgroup_ids:
+        if  len(hostgroup_ids[0]) == 1 and int(hostgroup_ids[0]) == -1 :
+            return HttpResponse('请选择要执行命令的主机组<br/>')
+        elif not  target_path_name :
+            return HttpResponse('请输入远端地址<br/>')
+        elif not change_code_url:
+            return HttpResponse('请选择SVN地址<br/>')
+        else:
+            ths = []
+            global q 
+            q = []
+            for hostgroup in hostgroup_ids:
+                hostgroup = int(hostgroup)
+                if hostgroup == 0:
+                    hosts = models.Host.objects.filter(status=models.HostStatus.objects.get(name='online'))
+                    for host in hosts:
+                        th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username,hostgroup_ids))
+                        ths.append(th)
+
+                    for i in ths:
+                        i.setDaemon(False)    
+                        i.start()
+                    for i in ths:    
+                        i.join()  
+  
+                else:
+                    for host in models.Host.objects.filter(hostgroup=models.HostGroup.objects.get(id=hostgroup),status=models.HostStatus.objects.get(name='online')):
+                        th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username,hostgroup_ids))
+                        ths.append(th)
+                        
+                    for i in ths:
+                        i.setDaemon(False)    
+                        i.start()
+                    for i in ths:    
+                        i.join()    
+            
+        contents = ''
+        
+        q.reverse()
+       
+        print '最后的q:',q
+        for j in range(len(q)):
+            contents +=  q.pop()
+            print '222:',contents      
+                            
+        return HttpResponse(contents)                
+    else:
+        return HttpResponse('请选择主机组或主机<br/>')
+    
+    
 @login_dresser
 def cmd_detail(request,page):
     username = request.COOKIES.get('username_password').split('&')[0]
@@ -373,14 +493,22 @@ def cmd_log(request,page):
     
     task_log = []
     
-    for log in result:  
-        
+    for log in result:              
+        if isinstance(eval(log.log),list):
+            log1 = '<br>'.join(eval(log.log)).replace(' ','&nbsp;')  
+            print 111
+        else:
+            
+            log1 = log.log.replace(' ','&nbsp;')
+            print 222
+            
+            
         log_dict = {
                     'id':log.id,
                     'task_id':log.task_id,
                     'task_name':models.Task.objects.get(id=log.task_id).name,
                     'result':log.result,
-                    'log':'<br>'.join(eval(log.log)).replace(' ','&nbsp;'),
+                    'log':log1,
                     'hostname':models.Host.objects.get(id=log.host_id).hostname,
                     'groupname':models.Host.objects.get(id=log.host_id).hostgroup,
                     'date':log.date

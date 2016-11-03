@@ -1,0 +1,304 @@
+{% extends 'cmdb/cmdb.html' %} {% block css %}
+<link href="/static/css/common2.css" rel="stylesheet" type="text/css">
+
+<link href="/static/css/ymPrompt.css" rel="stylesheet" type="text/css">
+
+<link href="/static/css/smartMenu.css" rel="stylesheet" type="text/css">
+
+<link href="/static/css/pace.min.css" rel="stylesheet">
+
+<script src="/static/js/pace.min.js"></script>
+
+<link  href="/static/css/bootstrap-datetimepicker.min.css" rel="stylesheet" type="text/css">
+
+{% endblock %} {% block cmdb_detail %}
+
+<div id="systemWorking"
+	style="z-index: 100; position: absolute; display: none; left: 40%; top: 40%">
+	<table width="10" height="20" border="0" cellpadding="0"
+		cellspacing="1">
+		<tr>
+			<td align="center" valign="middle">
+				<img src="/static/images/loading.gif" align=center>
+			</td>
+		</tr>
+	</table>
+</div> 
+
+
+<table width="100%" height="64" border="0" cellspacing="0"
+	cellpadding="0">
+	<tr>
+		<td>&nbsp;</td>
+	</tr>
+</table>
+
+<table height="800" width="800" border="1" align="left" cellpadding="3"
+	cellspacing="0" id="maintables">
+	<form action="" method="get" name="systemForm">
+
+		<tr>
+			<td align="left">
+				<div align="center">
+
+				</div>
+			</td>
+			<td align="left">
+				<div>
+					<label for="name">源SVN地址:</label>
+					<select id="change_code_url" class="form-control" name="change_code_url"  >
+						<option value="0" selected="selected">请选择SVN地址</option>
+						<option value="1">欧孚视聘：https://192.168.1.12/svn/BridgehrKit/VISS/solution/Online/AppService</option>
+						<option value="2">BOSS聘API: https://192.168.1.12/svn/BridgehrKit/VISS/solution/Online/BOSSAPI</option>
+						<option value="3">BOSS聘: <br />https://192.168.1.12/svn/BridgehrKit/VISS/solution/Online/BOSSWEB</option>
+						<option value="4">欧孚科技: https://192.168.1.12/svn/BridgehrKit/VISS/solution/Online/Notice</option>
+						<option value="5">企业号: https://192.168.1.12/svn/BridgehrKit/VISS/solution/Online/qy</option>
+						<option value="6">测试: https://192.168.1.239:8443/svn/9191offer/offer</option>
+						
+					</select>
+				</div>
+				
+				<div class="form-group">
+					<label for="name">目标地址:</label>
+					<input type="text" class="form-control" id="target_path_name"  name="target_path_name"
+						   placeholder="目标地址:例如 /data/www/wwwroot">
+				</div>
+				
+			</td>
+		</tr>
+
+
+		<tr bgcolor="#eeeeee">
+			<td width="1" rowspan="3" valign="top" bgcolor="#eeeeee">
+
+				<table width="20%" border="1" cellspacing="1" cellpadding="0">
+					<tr>
+						<td>
+							<select name="hostgroup_name" id="hostgroup_name"
+								onChange="change_hostgroup(this.value)"
+								class="sys_server_select" size="8" multiple>
+								<option value="-1">正在加载...</option>
+							</select>
+						</td>
+					</tr>
+
+					<tr>
+						<td>
+							<select name="host_ip" id="host_ip" class="sys_server_select"
+								size="40" multiple>
+								<!--			<option value="-1"><-请选择主机-></option> -->
+							</select>
+						</td>
+					</tr>
+
+				</table>
+
+			</td>
+			<td height="50" align="right" bgcolor="#eeeeee">
+				<table width="99%" border="1" cellspacing="0" cellpadding="0">
+					<tr>
+						<td align="left">
+							
+								<table width="100%" height="10" border="0" cellpadding="3"
+									cellspacing="0">
+									<tr>
+										
+										<td align="left">
+											<input type="button" name="Submit_run1" value="运  行"
+												id="sys_run_button" onClick="return update_svn();">
+												&nbsp;&nbsp;
+											<input type="button" name="Submit_ref2" value="刷  屏"
+												id="sys_run_button" onClick="return clear_screen();">
+										</td>
+									</tr>
+								</table>
+
+							
+						</td>
+					</tr>
+				</table>
+
+			</td>
+		</tr>
+		<tr>
+			<td height="4" valign="top" bgcolor="#eeeeee"></td>
+		</tr>
+		
+		<tr>
+			<td valign="top" align="center" bgcolor="#030303">
+				<table width="99%" border="0" cellspacing="100" cellpadding="0"
+					bgcolor="#000000">
+					<tr>
+						<td align="left">
+							<div class="ajaxmodulerunresult" id="ajaxmodulerunresult"
+								style="overflow: auto; height: 700px; OVERFLOW-y: auto; font-family: Verdana, Arial, Vrinda, Tahoma;"></div>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<input type="hidden" name="ModuleID" id="ModuleID" value="">
+		<input type="hidden" name="ModuleName" id="ModuleName" value="">
+	</form>
+</table>
+<br>
+
+
+{% endblock %} {% block cmdb_js %}
+
+<script src='/static/js/jquery-smartMenu.js'></script>
+
+<script src="/static/plugins/jquery-ui/jquery-ui.min.js"></script>
+
+<script src="/static/plugins/bootstrap-fileinput/js/fileinput.js"></script>
+
+<script src="/static/plugins/bootstrap-select/bootstrap-select.min.js"></script>
+
+<script src="/static/js/bootstrap-datetimepicker.min.js"></script>
+
+<script>
+	$(function() {
+		$("[href='/cmdb/create_host']").parent().removeClass('active');
+		$("[href='/cmdb/host_group_create']").parent().removeClass('active');
+		$("[href='/cmdb/host_list']").parent().removeClass('active');
+		$("[href='/cmdb/host_group_list']").parent().removeClass('active');
+		$("[href='/cmdb/cmd']").parent().removeClass('active');
+		$("[href='/cmdb/code_release']").parent().addClass('active');
+		
+		$.ajax({
+					type : "POST",
+					url : "/cmdb/getHostGroup/",
+					dataType : 'json',
+					success : function(data, textStatus) {
+						if (textStatus == 'success') {
+							$("#hostgroup_name").empty();
+							if (data.length > 0) {
+
+								for ( var i = 0; i < data.length; i++) {
+									var str1 = "<option value="+data[i].group_id+"><font class='baner_font'>"
+											+ data[i].group_name
+											+ "</font></option>";
+									$("#hostgroup_name").prepend(str1);
+									console.log(str1);
+								}
+								var str1 = "<option value=-1><font class='baner_font'><-选择主机组-></font></option>";
+								$("#hostgroup_name").prepend(str1);
+							}
+						}
+					}
+				});
+	});
+
+	
+
+	function subcmd() {
+		var hostgroup_id = $("#hostgroup_name").val();
+		var host_id = $("#host_ip").val();
+		var cmd_content = $("#text_cmd").val();
+		var files = $("#id_file").val()
+	
+		$.ajax({
+			type : "POST",
+			data : {
+				'hostgroup_id' : hostgroup_id,
+				'host_id' : host_id,
+				'cmd_content' : cmd_content,
+				'files': files
+			},
+			url : "/cmdb/cmd_run/",
+			success : function(data, textStatus) {
+				console.log(data);
+				if (textStatus == 'success') {
+					//$("#ajaxmodulerunresult").empty();
+					if (data.length > 0) {
+						var content = $("#ajaxmodulerunresult").html();
+						$("#ajaxmodulerunresult").html(data + content);
+					}
+				}
+			}
+
+		});
+	};
+
+	function clear_screen() {
+		$("#ajaxmodulerunresult").html('');
+	}
+	
+	
+	function change_hostgroup(arg) {
+		$.ajax({
+					type : "POST",
+					data : {
+						'hostgroup_id' : arg
+					},
+					url : "/cmdb/cmd_hostname/",
+
+					success : function(data, textStatus) {
+						if (textStatus == 'success') {
+							$("#host_ip").empty();
+							if (data.length > 0) {
+								var str1 = '';
+								for ( var i = 0; i < data.length; i++) {
+									if (data[i].wan_ip) {
+										var str1 = "<option value="+data[i].id+"><font class='baner_font'>"
+												+ data[i].hostname
+												+ "__"
+												+ data[i].wan_ip
+												+ "</font></option>";
+										$("#host_ip").prepend(str1);
+									} else {
+										var str1 = "<option value="+data[i].id+"><font class='baner_font'>"
+												+ data[i].hostname
+												+ "__"
+												+ data[i].lan_ip
+												+ "</font></option>";
+										$("#host_ip").prepend(str1);
+									}
+
+								}
+								//var str1 = "<option value=-1><font class='baner_font'><-选择主机-></font></option>";
+								//$("#host_ip").prepend(str1);
+							}
+						}
+					}
+				});
+		};
+	
+
+	function update_svn(){
+		var change_code_url = $("#change_code_url option:selected").text().split(' ')[1];
+		var target_path_name = $("#target_path_name").val();
+		var hostgroup_id = $("#hostgroup_name").val();
+		var host_id = $("#host_ip").val();
+		
+		$.ajax({
+			type : "POST",
+			data : {
+				'hostgroup_id' : hostgroup_id,
+				'host_id' : host_id,
+				'change_code_url' : change_code_url,
+				'target_path_name': target_path_name
+			},
+			url : "/cmdb/update_svn/",
+			success : function(data, textStatus) {
+				console.log(data);
+				if (textStatus == 'success') {
+					//$("#ajaxmodulerunresult").empty();
+					if (data.length > 0) {
+						var content = $("#ajaxmodulerunresult").html();
+						$("#ajaxmodulerunresult").html(data + content);
+					}
+				}
+			}
+
+		});
+	
+	}
+	
+</script>
+
+{% endblock %}
+
+
+
+

@@ -14,7 +14,7 @@ from django.http import HttpResponseRedirect
 from app001 import models
 
 from app001 import forms
-
+  
 import datetime
 #from werkzeug import responder
 
@@ -497,14 +497,22 @@ def task_log(request,page):
     
     task_log = []
     
-    for log in result:  
+    for log in result:     
+        if isinstance(eval(log.log),list):
+            log1 = '<br>'.join(eval(log.log)).replace(' ','&nbsp;')  
+            print 111
+        else:
+            
+            log1 = log.log.replace(' ','&nbsp;')
+            print 222
+            
         
         log_dict = {
                     'id':log.id,
                     'task_id':log.task_id,
                     'task_name':models.Task.objects.get(id=log.task_id).name,
                     'result':log.result,
-                    'log':'<br>'.join(eval(log.log)).replace(' ','&nbsp;'),
+                    'log':log1,
                     'hostname':models.Host.objects.get(id=log.host_id).hostname,
                     'groupname':models.Host.objects.get(id=log.host_id).hostgroup,
                     'date':log.date

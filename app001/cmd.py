@@ -173,8 +173,9 @@ def ssh2(ip,hostname,port,username,cmd_content,files,login_username,hostgroup_id
             sql = 'insert into tasklog(result,log,host_id,date,task_id) values("%s","%s",%d,"%s",%d)'%('failed',[str(e)],host_name_id,datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),task_id)
             cursor.execute(sql) 
             content = str(e)
-            print e
+            content = "<font color='red'>"+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")+"<br/>"+hostname+":</font>  <br/>"
             content += '<br />ip:%s connection failed...............<br />'%ip
+            content += '-'*100+" <br/>"
         
         
           

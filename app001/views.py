@@ -756,7 +756,7 @@ def host_list_s(request):
         pageObj = html_helper_bootstarp.PageInfo(page,count,peritems=2)
 
 
-        results = models.Host.objects.filter(Q(hostname = text_ip_hostname) | Q(lan_ip = text_ip_hostname))
+        results = models.Host.objects.filter(Q(hostname = text_ip_hostname) | Q(lan_ip = text_ip_hostname) | Q(wan_ip = text_ip_hostname))
  
         str1 = '''
                 <div id="host_list_conditions" class="table-responsive">

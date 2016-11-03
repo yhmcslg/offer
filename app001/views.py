@@ -5,9 +5,11 @@ from django.template import RequestContext
 from django.http import  HttpResponse
 #from django.views.decorators.http import require_http_methods
 # Create your views here.
-import os,sys
+import os,sys,platform
 reload(sys)
-#sys.setdefaultencoding('utf8')
+
+if platform.system() == 'Linux':
+    sys.setdefaultencoding('utf8')
 
 from django.http import HttpResponseRedirect
 

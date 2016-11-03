@@ -4,11 +4,18 @@ from django.shortcuts import  render_to_response,redirect,render
 from django.template import RequestContext  
 from django.http import  HttpResponse
 
+import os,sys,platform
+reload(sys)
+
+if platform.system() == 'Linux':
+    sys.setdefaultencoding('utf8')
+
+
 from app001 import models
 
 from app001.views import login_dresser
 
-import json,os,datetime
+import json,datetime
 
 import paramiko
 

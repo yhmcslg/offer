@@ -500,11 +500,8 @@ def task_log(request,page):
     for log in result:     
         if isinstance(eval(log.log),list):
             log1 = '<br>'.join(eval(log.log)).replace(' ','&nbsp;')  
-            print 111
         else:
-            
             log1 = log.log.replace(' ','&nbsp;')
-            print 222
             
         
         log_dict = {

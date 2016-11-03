@@ -507,6 +507,7 @@ def cmd_log(request,page):
                     'id':log.id,
                     'task_id':log.task_id,
                     'task_name':models.Task.objects.get(id=log.task_id).name,
+                    'content' : log.task.content,
                     'result':log.result,
                     'log':log1,
                     'hostname':models.Host.objects.get(id=log.host_id).hostname,

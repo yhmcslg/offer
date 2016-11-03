@@ -213,7 +213,7 @@ def ssh2(ip,hostname,port,username,cmd_content,files,login_username,hostgroup_id
         print e   
   
     q.append(content) 
-    print '循环中的q',q        
+    print '循环中的q:',q        
     #return content
     
 @login_dresser
@@ -483,6 +483,8 @@ def cmd_detail(request,page):
 @login_dresser  
 def cmd_log(request,page):
     username = request.COOKIES.get('username_password').split('&')[0]
+    
+    page = request.GET.get('page_id')
     
     page = common.try_int(page,1)
 

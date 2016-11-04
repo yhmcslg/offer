@@ -449,7 +449,7 @@ text-indent: 2px; //option在FF等非IE浏览器缩进2px
 #sys_run_button {
 	border:0px;
 	color:#ffffff;
-	background-image: url(/static/images/120.gif);
+	background-image: url(/static/img/120.gif);
 	font-weight:bold;
 	font-size:15px;
 	height: 31px;
@@ -459,7 +459,7 @@ text-indent: 2px; //option在FF等非IE浏览器缩进2px
 #sys_add_button {
 	border:0px;
 	color:#ffffff;
-	background-image: url(/static/images/116.gif);
+	background-image: url(/static/img/116.gif);
 	font-weight:bold;
 	font-size:15px;
 	height: 31px;

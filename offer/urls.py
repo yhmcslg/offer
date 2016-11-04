@@ -2,7 +2,10 @@ from django.conf.urls import include, url
 from django.contrib import admin
 from app001 import views
 
+import settings
 
+
+    
 urlpatterns = [
     # Examples:
     # url(r'^$', 'offer.views.home', name='home'),
@@ -27,3 +30,8 @@ urlpatterns = [
 
 
 ]
+
+
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns.append(url(r'^__debug__/', include(debug_toolbar.urls)))

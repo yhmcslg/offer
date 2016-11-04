@@ -44,7 +44,7 @@
 				<td>{{d.groupname}}</td>
 				<td>{{d.date|date:"Y-m-d H:i:s"}}</td>
 				<td>
-					<a onclick='DeleteItem(this);' class='label label-danger''>删除</a>
+					<a onclick='DeleteItem(this);' class='label label-danger'>删除</a>
 				</td>
 			</tr>
 			{% endfor %}
@@ -67,11 +67,11 @@
 	<div class='cancle' onclick='CancleShade();'>x</div>
 	<div class='title'>提示</div>
 	<form id='form1' class='form' method='post'
-		action='/task/del_task_log/'>
+		action='/cmdb/del_cmdb_log/'>
 		{% csrf_token %}
 		<div>
 			<input type='hidden' id='delnid' name='delnid' />
-			<input type='hidden' id='page_id2' name='page_id2' />
+			<input type='hidden' id='page_id' name='page_id' />
 			是否要删除？
 		</div>
 		<div class='bottom'>
@@ -89,7 +89,7 @@
 
 
 
-{% endblock %} {% block task_js %}
+{% endblock %} {% block cmdb_js %}
 
 <script>
 		$(document).ready(function() {
@@ -123,7 +123,7 @@
 			data = data.reverse()
 		
 			$('#delnid').val(data[0])
-			$('#page_id2').val({{ page_number }});
+			$('#page_id').val({{ page_number }});
 			$('#wpq-modal-del,#shade').removeClass('hide');
 			
 			

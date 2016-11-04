@@ -114,7 +114,10 @@ def logout(request):
 def CheckOnLine(request):
     c = {}
     
-    username = request.COOKIES.get('username_password').split('&')[0]
+    username = request.COOKIES.get('username_password')
+    
+    if username:
+        username = username.split('&')[0]
     
     is_login  = request.session.get(username,default=None)
 
@@ -536,12 +539,12 @@ def del_task_log(request):
     if request.method == 'POST':
         try:
             nid = request.POST.get('delnid')
-            page_id = request.POST.get('page_id2')
+            page_id = request.POST.get('page_id')
             models.TaskLog.objects.get(id=int(nid)).delete()
         except Exception,e:
             print e
         
-    return redirect('/task/task_log/%d'%int(page_id))
+    return redirect('/task/task_log/?page_id=%d'%int(page_id))
     
 #===================cmdb=====================================================
 
@@ -758,7 +761,7 @@ def host_list_s(request):
         pageObj = html_helper_bootstarp.PageInfo(page,count,peritems=2)
 
 
-        results = models.Host.objects.filter(Q(hostname = text_ip_hostname) | Q(lan_ip = text_ip_hostname) | Q(wan_ip = text_ip_hostname))
+        results = models.Host.objects.filter(Q(hostname__contains = text_ip_hostname) | Q(lan_ip__contains = text_ip_hostname) | Q(wan_ip__contains = text_ip_hostname))
  
         str1 = '''
                 <div id="host_list_conditions" class="table-responsive">

@@ -71,7 +71,7 @@
 		{% csrf_token %}
 		<div>
 			<input type='hidden' id='delnid' name='delnid' />
-			<input type='hidden' id='page_id2' name='page_id2' />
+			<input type='hidden' id='page_id' name='page_id' />
 			是否要删除？
 		</div>
 		<div class='bottom'>
@@ -119,7 +119,7 @@
 			data = data.reverse()
 		
 			$('#delnid').val(data[0])
-			$('#page_id2').val({{ page_number }});
+			$('#page_id').val({{ page_number }});
 			$('#wpq-modal-del,#shade').removeClass('hide');
 			
 			

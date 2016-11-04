@@ -532,6 +532,20 @@ def cmd_log(request,page):
                               ret,
                               context_instance=RequestContext(request)
                               )
+ 
+@login_dresser
+def del_cmdb_log(request):
+    if request.method == 'POST':
+        try:
+            nid = request.POST.get('delnid')
+            page_id = request.POST.get('page_id')
+            models.TaskLog.objects.get(id=int(nid)).delete()
+        except Exception,e:
+            print e
+        
+    return redirect('/cmdb/cmd_log/?page_id=%d'%int(page_id))   
+   
+   
     
 @login_dresser  
 def nt_floor(request):

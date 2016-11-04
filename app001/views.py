@@ -101,7 +101,9 @@ def login(request):
 
 def logout(request):
     try:
-        username = request.COOKIES.get('username_password').split('&')[0]
+        username = request.COOKIES.get('username_password')
+        if username:
+            username = username.split('&')[0]
         del request.session[username]
     except KeyError:
         pass

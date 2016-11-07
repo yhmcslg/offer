@@ -499,16 +499,21 @@ def task_log(request,page):
     count = models.TaskLog.objects.filter().count()
 
     pageObj = html_helper_bootstarp.PageInfo(page,count,peritems=10)
-
-    result = models.TaskLog.objects.all()[pageObj.From:pageObj.To]
     
+    status_id = request.GET.get('status_id')
+    
+    if status_id:
+        result = models.TaskLog.objects.filter()[pageObj.From:pageObj.To]
+    else:
+        result = models.TaskLog.objects.all()[pageObj.From:pageObj.To]
+        
     task_log = []
     
     for log in result:     
-        if isinstance(eval(log.log),list):
-            log1 = '<br>'.join(eval(log.log)).replace(' ','&nbsp;')  
-        else:
-            log1 = log.log.replace(' ','&nbsp;')
+        #if isinstance(eval(log.log),list):
+        #    log1 = '<br>'.join(eval(log.log)).replace(' ','&nbsp;')  
+        #else:
+        #    log1 = log.log.replace(' ','&nbsp;')
             
         
         log_dict = {
@@ -517,7 +522,7 @@ def task_log(request,page):
                     'task_name':models.Task.objects.get(id=log.task_id).name,
                     'content' : log.task.content,
                     'result':log.result,
-                    'log':log1,
+                    'log':log.log.replace(' ','&nbsp;'),
                     'hostname':models.Host.objects.get(id=log.host_id).hostname,
                     'groupname':models.Host.objects.get(id=log.host_id).hostgroup,
                     'date':log.date

@@ -132,8 +132,14 @@ def ssh2(ip,hostname,port,username,cmd_content,files,login_username,hostgroup_id
             if  std_out:
                 sql = 'update taskhoststatus set status=1 where id=%d'%task_id
                 cursor.execute(sql)
+                     
+                std_outs = ''
+                          
+                for out in std_out:
+                    std_outs += out        
                                 
-                sql = 'insert into tasklog(result,log,host_id,date,task_id) values("%s","%s",%d,"%s",%d)'%('success',std_out,host_name_id,datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),task_id)
+                sql = 'insert into tasklog(result,log,host_id,date,task_id) values("%s","%s",%d,"%s",%d)'%('success',std_outs,host_name_id,datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),task_id)
+                print sql
                 cursor.execute(sql)
                 
                 
@@ -144,7 +150,8 @@ def ssh2(ip,hostname,port,username,cmd_content,files,login_username,hostgroup_id
                 for s in std_out[1:]:
                     s = s.replace("\n","<br/>")
                     s = s.replace(" ","&nbsp;")
-                    s = s.replace("\x1b[7l","")
+                    if s.find('\x1b[7l'):
+                        s = s.replace("\x1b[7l","")
                     content += s
                     
             elif std_err:
@@ -163,7 +170,8 @@ def ssh2(ip,hostname,port,username,cmd_content,files,login_username,hostgroup_id
                 for s in std_err[1:]:
                     s = s.replace("\n","<br/>")
                     s = s.replace(" ","&nbsp;")
-                    s = s.replace("\x1b[7l","")
+                    if s.find('\x1b[7l'):
+                        s = s.replace("\x1b[7l","")
     
                     content += s  
             else:
@@ -176,7 +184,7 @@ def ssh2(ip,hostname,port,username,cmd_content,files,login_username,hostgroup_id
                 
                 
         except Exception,e:
-            print '444:'
+            print '444:%s'%str(e)
             sql = 'insert into tasklog(result,log,host_id,date,task_id) values("%s","%s",%d,"%s",%d)'%('failed',[str(e)],host_name_id,datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),task_id)
             cursor.execute(sql) 
             content = str(e)
@@ -344,10 +352,28 @@ def update_svn(request):
         
         target_path_name = request.POST.get('target_path_name')
 
+        svn_version = request.POST.get('svn_version')
 
-    cmd_content = ' if [ ! -d %s ];then mkdir -p %s;fi; svn info %s >/dev/null 2>&1 ;if [ $? -ne 0 ];then  svn co %s %s ;else  svn update %s ;fi'%(target_path_name,target_path_name,target_path_name,change_code_url,target_path_name,target_path_name)
+    if svn_version:
+        cmd_content = '''
+                    svn update -r %s %s
+                '''%(svn_version,target_path_name)
+    else:
+        cmd_content = ''' 
+                        if [ ! -d %s ];then 
+                            mkdir -p %s;
+                        fi; 
+                        
+                        svn info %s >/dev/null 2>&1 ;
+                        
+                        if [ $? -ne 0 ];then  
+                            svn co --username Yanhouming --password yhm %s %s ;
+                        else  
+                            svn update %s ;
+                        fi;
+                    '''%(target_path_name,target_path_name,target_path_name,change_code_url,target_path_name,target_path_name)
 
-
+    print 'cmd_content:%s'%cmd_content
     if host_ids:
         if len(host_ids) == 1 and host_ids[0] == -1:
             return HttpResponse('请选择要执行命令的主机<br/>')
@@ -380,7 +406,7 @@ def update_svn(request):
         return HttpResponse(contents) 
            
     elif hostgroup_ids:
-        if  len(hostgroup_ids[0]) == 1 and int(hostgroup_ids[0]) == -1 :
+        if  int(hostgroup_ids) == -1 :
             return HttpResponse('请选择要执行命令的主机组<br/>')
         elif not  target_path_name :
             return HttpResponse('请输入远端地址<br/>')
@@ -499,15 +525,12 @@ def cmd_log(request,page):
 
     pageObj = html_helper_bootstarp.PageInfo(page,count,peritems=10)
 
-    result = models.TaskLog.objects.all()[pageObj.From:pageObj.To]
+    result = models.TaskLog.objects.all().order_by('-id')[pageObj.From:pageObj.To]
     
     task_log = []
     
     for log in result:              
-        if isinstance(eval(log.log),list):
-            log1 = '<br>'.join(eval(log.log)).replace(' ','&nbsp;')  
-        else:
-            log1 = log.log.replace(' ','&nbsp;')
+        
             
             
         log_dict = {
@@ -516,7 +539,7 @@ def cmd_log(request,page):
                     'task_name':models.Task.objects.get(id=log.task_id).name,
                     'content' : log.task.content,
                     'result':log.result,
-                    'log':log1,
+                    'log':log.log.replace(' ','&nbsp;').replace('\n','<br />'),
                     'hostname':models.Host.objects.get(id=log.host_id).hostname,
                     'groupname':models.Host.objects.get(id=log.host_id).hostgroup,
                     'date':log.date

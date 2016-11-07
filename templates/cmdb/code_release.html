@@ -64,6 +64,12 @@
 						   placeholder="目标地址:例如 /data/www/wwwroot">
 				</div>
 				
+				<div class="form-group">
+					<label for="name">还原到版本号:</label>
+					<input type="text" class="form-control" id="svn_version"  name="svn_version"
+						   placeholder="输入版本号">
+				</div>
+				
 			</td>
 		</tr>
 
@@ -268,8 +274,10 @@
 	function update_svn(){
 		var change_code_url = $("#change_code_url option:selected").text().split(' ')[1];
 		var target_path_name = $("#target_path_name").val();
+		var svn_version = $("#svn_version").val();
 		var hostgroup_id = $("#hostgroup_name").val();
 		var host_id = $("#host_ip").val();
+		
 		
 		$.ajax({
 			type : "POST",
@@ -277,7 +285,8 @@
 				'hostgroup_id' : hostgroup_id,
 				'host_id' : host_id,
 				'change_code_url' : change_code_url,
-				'target_path_name': target_path_name
+				'target_path_name': target_path_name,
+				'svn_version': svn_version,
 			},
 			url : "/cmdb/update_svn/",
 			success : function(data, textStatus) {

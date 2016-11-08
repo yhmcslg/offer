@@ -189,7 +189,7 @@ def ssh2(ip,hostname,port,username,cmd_content,files,login_username,hostgroup_id
             cursor.execute(sql) 
             content = str(e)
             content = "<font color='red'>"+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")+"<br/>"+hostname+":</font>  <br/>"
-            content += '<br />ip:%s connection failed...............<br />'%ip
+            content += u'<br />ip:%s 连接失败...............<br />'%ip
             content += '-'*100+" <br/>"
         
         

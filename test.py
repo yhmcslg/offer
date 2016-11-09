@@ -1,3 +1,4 @@
-def application(env, start_response):
-    start_response('200 OK', [('Content-Type','text/html')])
-    return ["Hello World"]
+from django.shortcuts import  render_to_response
+
+def test(request):
+    render_to_response('test.html')

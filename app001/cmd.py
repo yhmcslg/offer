@@ -36,6 +36,8 @@ from app001 import forms
 
 from django.db import connection,transaction
 
+import subprocess 
+
 @login_dresser
 def cmd(request):
     return render_to_response('cmdb/cmd.html',context_instance=RequestContext(request))
@@ -187,8 +189,9 @@ def ssh2(ip,hostname,port,username,cmd_content,files,login_username,hostgroup_id
             print '444:%s'%str(e)
             sql = 'insert into tasklog(result,log,host_id,date,task_id) values("%s","%s",%d,"%s",%d)'%('failed',[str(e)],host_name_id,datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),task_id)
             cursor.execute(sql) 
-            content = str(e)
+            
             content = "<font color='red'>"+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")+"<br/>"+hostname+":</font>  <br/>"
+            content += str(e)
             content += u'<br />ip:%s 连接失败...............<br />'%ip
             content += '-'*100+" <br/>"
         
@@ -354,10 +357,13 @@ def update_svn(request):
 
         svn_version = request.POST.get('svn_version')
 
-    if svn_version:
+    if svn_version != "CheckOut":
         cmd_content = '''
-                    svn update -r %s %s
-                '''%(svn_version,target_path_name)
+                    svn info %s;
+                    if [ $? -eq 0 ];then
+                        svn update -r %s %s
+                    fi
+                '''%(target_path_name,svn_version,target_path_name)
     else:
         cmd_content = ''' 
                         if [ ! -d %s ];then 
@@ -373,7 +379,7 @@ def update_svn(request):
                         fi;
                     '''%(target_path_name,target_path_name,target_path_name,change_code_url,target_path_name,target_path_name)
 
-    print 'cmd_content:%s'%cmd_content
+  
     if host_ids:
         if len(host_ids) == 1 and host_ids[0] == -1:
             return HttpResponse('请选择要执行命令的主机<br/>')
@@ -453,8 +459,33 @@ def update_svn(request):
         return HttpResponse(contents)                
     else:
         return HttpResponse('请选择主机组或主机<br/>')
+
+ 
+
+@login_dresser    
+def get_svn_info(request):
+    change_code_url = request.POST.get('change_code_url')
     
+    resutl = []
     
+    i = 1
+    
+    p = subprocess.Popen('svn log %s'%change_code_url, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    
+    for line in p.stdout.readlines():
+        
+        if not line.find('-'):
+            continue
+        
+        L1 = {'id':i,'svn_log':line.encode('utf8')}
+        
+        resutl.append(L1)
+        
+        i+=1
+    
+        print line.encode('utf8')
+    return HttpResponse(json.dumps(resutl),content_type="application/json")  
+
 @login_dresser
 def cmd_detail(request,page):
     username = request.COOKIES.get('username_password').split('&')[0]

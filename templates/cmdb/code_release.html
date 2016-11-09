@@ -46,9 +46,9 @@
 			<td align="left">
 				<div>
 					<label for="name">源SVN地址:</label>
-					<select id="change_code_url" class="form-control" name="change_code_url"  >
+					<select id="change_code_url" class="form-control" name="change_code_url"  onchange="get_svn_info()">
 						<option value="0" selected="selected">请选择SVN地址</option>
-						<option value="1">欧孚视聘：https://192.168.1.12/svn/BridgehrKit/VISS/solution/Online/AppService</option>
+						<option value="1">欧孚视聘: https://192.168.1.12/svn/BridgehrKit/VISS/solution/Online/AppService</option>
 						<option value="2">BOSS聘API: https://192.168.1.12/svn/BridgehrKit/VISS/solution/Online/BOSSAPI</option>
 						<option value="3">BOSS聘: <br />https://192.168.1.12/svn/BridgehrKit/VISS/solution/Online/BOSSWEB</option>
 						<option value="4">欧孚科技: https://192.168.1.12/svn/BridgehrKit/VISS/solution/Online/Notice</option>
@@ -66,8 +66,9 @@
 				
 				<div class="form-group">
 					<label for="name">还原到版本号:</label>
-					<input type="text" class="form-control" id="svn_version"  name="svn_version"
-						   placeholder="输入版本号">
+					<select  class="form-control" id="svn_version"  name="svn_version">
+						   <option value="0" selected="selected">请选择版本号</option>
+					</select>	   
 				</div>
 				
 			</td>
@@ -274,10 +275,12 @@
 	function update_svn(){
 		var change_code_url = $("#change_code_url option:selected").text().split(' ')[1];
 		var target_path_name = $("#target_path_name").val();
-		var svn_version = $("#svn_version").val();
+		var svn_version = $("#svn_version option:selected").text().split("|")[0].replace('r','');
 		var hostgroup_id = $("#hostgroup_name").val();
 		var host_id = $("#host_ip").val();
 		
+		console.log("svn_version:");
+		console.log(svn_version);
 		
 		$.ajax({
 			type : "POST",
@@ -290,7 +293,7 @@
 			},
 			url : "/cmdb/update_svn/",
 			success : function(data, textStatus) {
-				console.log(data);
+				
 				if (textStatus == 'success') {
 					//$("#ajaxmodulerunresult").empty();
 					if (data.length > 0) {
@@ -302,6 +305,46 @@
 
 		});
 	
+	}
+	
+	
+	function get_svn_info(){
+		var change_code_url = $("#change_code_url option:selected").text().split(' ')[1];
+		
+		$("#target_path_name").val("/data/www/" + change_code_url.split('/').pop());
+		
+		$.ajax({
+			type : "POST",
+			data : {
+				'change_code_url' : change_code_url,
+			},
+			
+			url : "/cmdb/get_svn_info/",
+			
+			success : function(data, textStatus) {
+				
+				if (textStatus == 'success') {
+					
+					$("#svn_version").empty();
+					
+					var str1 = '<option value="-1" selected="selected">CheckOut';
+					
+					if (data.length > 0) {
+						for(var i=0;i<data.length;i++){
+							if (i % 3 == 0){
+								str1 += "</option><option value="+data[i].id+">"+data[i].svn_log;
+							}
+							else{
+								str1 += data[i].svn_log;
+							}
+						}
+					};
+					$("#svn_version").append(str1);
+				}
+			}
+
+		});
+		
 	}
 	
 </script>

@@ -53,7 +53,7 @@
 
 		<tr>
 			<td>总记录数:{{ count }}</td>
-			<td>当前页数:{{ page_number }}</td>
+			<td>当前页数:{{ current_page }}</td>
 		</tr>
 	</table>
 </div>
@@ -112,6 +112,9 @@
 			$.validate('#form');
 		})
 		
+		function CancleShade(){
+			$('#wpq-modal,#wpq-modal-del,#shade').addClass('hide');
+		}
 		
 		
 		function DeleteItem(arg){
@@ -123,7 +126,7 @@
 			data = data.reverse()
 		
 			$('#delnid').val(data[0])
-			$('#page_id').val({{ page_number }});
+			$('#page_id').val({{ current_page }});
 			$('#wpq-modal-del,#shade').removeClass('hide');
 			
 			

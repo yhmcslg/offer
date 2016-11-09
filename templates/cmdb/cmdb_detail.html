@@ -49,7 +49,7 @@
 		
 		<tr>
 			<td>总记录数:{{ count }}</td>
-			<td>当前页数:{{ page_number }}</td>
+			<td>当前页数:{{ current_page }}</td>
 		</tr>
 		
 	</table>
@@ -126,7 +126,7 @@
 			data = data.reverse()
 		
 			$('#delnid').val(data[0])
-			$('#page_id2').val({{ page_number }});
+			$('#page_id2').val({{ current_page }});
 			$('#wpq-modal-del,#shade').removeClass('hide');
 			
 			

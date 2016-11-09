@@ -535,7 +535,7 @@ def cmd_detail(request,page):
         
     page_string = html_helper_bootstarp.Custompager('/cmdb/cmd_detail/',page,pageObj.TotalPage)
 
-    ret = {'f':form,'task_list':task_list,'count':count,'page_number':pageObj.TotalPage,'page':page_string}
+    ret = {'f':form,'task_list':task_list,'count':count,'page_number':pageObj.TotalPage,'page':page_string,'current_page':page}
 
     return render_to_response('cmdb/cmdb_detail.html',
                               ret,
@@ -580,7 +580,7 @@ def cmd_log(request,page):
 
     page_string = html_helper_bootstarp.Custompager('/cmdb/cmd_log/',page,pageObj.TotalPage)
 
-    ret = {'data':task_log,'count':count,'page_number':pageObj.TotalPage,'page':page_string}
+    ret = {'data':task_log,'count':count,'page_number':pageObj.TotalPage,'page':page_string,'current_page':page}
 
     return render_to_response('cmdb/cmdb_log.html',
                               ret,

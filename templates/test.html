@@ -1,44 +1,75 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<HTML>
- <HEAD>
-  <TITLE> New Document </TITLE>
-  <META NAME="Generator" CONTENT="EditPlus">
-  <META NAME="Author" CONTENT="">
-  <META NAME="Keywords" CONTENT="">
-  <META NAME="Description" CONTENT="">
- </HEAD>
 
- <BODY>
-  <table width="200"  cellspacing="0" cellpadding="0" border="1" bordercolor="yellow">
-              <tr>
-			       <td align="left" style="font-size:12px;" width="50"> 左边</td>
-                <td align="right">
-				<span style="width:118px;border:1px solid black;">
-				<select name="postSelect" multiple style="margin-left:-100px;margin-top:-3px;width:118px;" 
-				size="4"
-				>
-				<option value="1" title="111111">111111</option> 
-				<option value="2" title="222222">222222</option> 
-				<option value="3" title="333333">333333</option> 				
-				<option value="4" title="444444444444444444444444444444">444444444444444444444444444444</option> 
-				<option value="5">555555</option> 
-				<option value="6">666666</option> 		
-					
-				</select>
-				<span>
-				<!--   测试环境：IE8
-				一、select 边框的问题
-				1、size属性用控制下拉框会显示几个option，如果是1，则显示1个option，多于一个option则显示竖向的滚动条，换句话说，size是用来控制高度的。
-				2、 style="width:100px" 控制宽度后，上、左两个方向有黑色框线，下、右没有，为什么？没有办法解决，所以用了加span的办法，
-				设置select\span的宽度相同，给span 加border:1px solid black，这个外框是真正我们看到的外框，然后设置select的margin-left:-100px;margin-top:-3px，这样我们就解决了边框的问题。
-				二、option选项过长的问题，
-				先注意option label值是没有换行的，加上\n,<br>都会被忽略，所以只能想别的办法
-				1、加一个title属性，值为你要显示的那个长度很长的值，这样当鼠标移动option上会有提示。
 
-				-->
+<html>
+<head>
+
+</head>
+<body>
+	<a href="#" onclick="Run('putty.exe')">RUN EXE</a>
+
+
+
+
+	<table width="20%" cellspacing="1" cellpadding="0" border="1">
+	
+			
+			<tr>
+				<td>
+					<select id="host_ip" class="sys_server_select" name="host_ip" size="40" multiple=""
+						style="background-color: rgb(214, 214, 255);">
+						<option value="20">host_241__192.168.1.241__22</option>
+						<option value="18">host_15__192.168.1.15__22</option>
+					</select>
 				</td>
-                <td align="right" width="50">右边   </td>
-              </tr>
-            </table
- </BODY>
-</HTML>
+			</tr>
+		
+	</table>
+
+<div id="alertTest" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3 id="myModalLabel">提示标题</h3>
+    </div>
+    <div class="modal-body">
+        <p>提示内容！</p>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+    </div>
+</div>
+
+
+<script src="/static/js/jquery-2.1.1.min.js"></script>
+<script language="javascript">
+
+	$(function() {
+		 $('#host_ip option').hover(
+					function(){
+		             alert('mouseenter function is running !');
+		            },
+		            function(){
+		                    alert('mouseleaver function is running !');
+		            });	
+	
+	});
+
+
+	function Run(strPath) //only for ie
+	{
+		try {
+			var objShell = new ActiveXObject("wscript.shell");
+			objShell.CurrentDirectory = "D:\\";
+			//设置当前路径很重要，能让exe程序解决 相对路径问题 （否则会在html所在路径找）
+			objShell.Run(strPath);
+			objShell = null;
+		} catch (e) {
+			alert(e.message);
+		}
+
+	}
+</script>
+
+
+
+</body>
+</html>

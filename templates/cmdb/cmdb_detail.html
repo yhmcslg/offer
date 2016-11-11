@@ -85,20 +85,21 @@
 {% endblock %}
 
 
-{% block task_js %}
+{% block cmdb_js %}
 
 	<script>
 		$(document).ready(function() {
 		
 			$("[href='/cmdb/create_host']").parent().removeClass('active');
+			$("[href='/cmdb/host_group_create']").parent().removeClass('active');
 			$("[href='/cmdb/host_list']").parent().removeClass('active');
-			$("[href='/cmdb/service_status']").parent().removeClass('active');
-			$("[href='/cmdb/service_group']").parent().removeClass('active');
-			$("[href='/cmdb/host_group']").parent().removeClass('active');
+			$("[href='/cmdb/host_group_list']").parent().removeClass('active');
+			$("[href='/cmdb/cmd']").parent().removeClass('active');
+			$("[href='/cmdb/code_release']").parent().removeClass('active');
 			$("[href='/cmdb/cmd_detail']").parent().addClass('active');
 			$("[href='/cmdb/cmd_log']").parent().removeClass('active');
 			
-			
+			 
 			$("#p1").hover(function(){
 				   alert("你进入了 p1!");
 				   },

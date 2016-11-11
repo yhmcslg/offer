@@ -33,14 +33,14 @@
 	</tr>
 </table>
 
-<table height="800" width="800" border="1" align="left" cellpadding="3"
+<table height="800" width="1500" border="1" align="left" cellpadding="3"
 	cellspacing="0" id="maintables">
 	<form action="" method="get" name="systemForm">
 
 		<tr>
 			<td align="left">
 				<div align="center">
-					<font class="baner_font" color="#030303">操作</font>
+					<font class="baner_font" color="#030303"></font>
 				</div>
 			</td>
 			<td align="left">
@@ -205,13 +205,33 @@
 
 		var data = [ 
 		             [ {
-						text : "打开服务器",
+						text : "用ShellInbox打开服务器",
 						func : function() {
 							var src = $(this).find('option:selected').text();
 							var ip = src.substring(src.indexOf("__") + 2);
+						
 							window.open("https://" + ip + ":4200");
 						}
 					} ],
+					
+		             [ {
+							text : "用Putty打开服务器",
+							func : function() {
+								var src = $(this).find('option:selected').text();
+								var ip = src.split("__")[1];
+								var port = src.split("__")[2];
+								
+								try{
+			                            var shell = new ActiveXObject("WScript.Shell");  
+			                            shell.CurrentDirectory="D:\\";
+			                            shell.Run("putty.exe -i D:\\Documents\\putty.ppk  root@" + ip + " -P " + port); 
+			                    }
+			                    catch(e){
+			                            alert("请使用IE浏览器.");
+			                    } 
+							}
+						} ],
+					
 		            [ {
 							text : "防攻击，关闭当前连接数超过100个链接的IP",
 							func : function() {
@@ -236,6 +256,8 @@
 			}
 		})
 
+		var src = $(this).find('option:selected').text();
+		
 		$("#host_ip").focus(function() {
 			$("#host_ip").css("background-color", "#FFFFCC");
 		})
@@ -243,6 +265,14 @@
 		$("#host_ip").blur(function() {
 			$("#host_ip").css("background-color", "#D6D6FF");
 		})
+		
+
+		
+		$('#host_ip option').hover(function() {
+			alert(src);
+		}, function() {
+			alert('mouseleaver function is running !');
+		});
 
 	});
 
@@ -288,6 +318,8 @@
 												+ data[i].hostname
 												+ "__"
 												+ data[i].wan_ip
+												+ "__"
+												+ data[i].port
 												+ "</font></option>";
 										$("#host_ip").prepend(str1);
 									} else {
@@ -295,6 +327,8 @@
 												+ data[i].hostname
 												+ "__"
 												+ data[i].lan_ip
+												+ "__"
+												+ data[i].port
 												+ "</font></option>";
 										$("#host_ip").prepend(str1);
 									}

@@ -22,7 +22,7 @@ import paramiko
 
 from third import handle_uploaded
 
-from offer.settings import BASE_DIR
+from offer.settings import BASE_DIR,PAGE_SIZE
 
 import threading
 
@@ -47,7 +47,7 @@ def cmd(request):
 def cmd_code_release(request):
     return render_to_response('cmdb/code_release.html',context_instance=RequestContext(request))
 
-
+@login_dresser
 def cmd_hostname(request):
     if request.method == 'POST':
         hostgroup_id = int(request.POST.get('hostgroup_id'))
@@ -61,7 +61,7 @@ def cmd_hostname(request):
     h_i = []
     
     for host_in in host_info:
-        H1 = {'id':host_in.id,'hostname':host_in.hostname,'wan_ip':host_in.wan_ip,'lan_ip':host_in.lan_ip}
+        H1 = {'id':host_in.id,'hostname':host_in.hostname,'wan_ip':host_in.wan_ip,'lan_ip':host_in.lan_ip,'port':host_in.port}
         h_i.append(H1)
         
     return HttpResponse(json.dumps(h_i),content_type="application/json")    
@@ -499,7 +499,7 @@ def cmd_detail(request,page):
     
     count = models.Task.objects.all().count()
 
-    pageObj = html_helper_bootstarp.PageInfo(page,count,peritems=5)
+    pageObj = html_helper_bootstarp.PageInfo(page,count,peritems=PAGE_SIZE)
 
     result = models.Task.objects.all().order_by('-id')[pageObj.From:pageObj.To]
 
@@ -554,7 +554,7 @@ def cmd_log(request,page):
 
     count = models.TaskLog.objects.filter().count()
 
-    pageObj = html_helper_bootstarp.PageInfo(page,count,peritems=10)
+    pageObj = html_helper_bootstarp.PageInfo(page,count,peritems=PAGE_SIZE)
 
     result = models.TaskLog.objects.all().order_by('-id')[pageObj.From:pageObj.To]
     

@@ -58,7 +58,7 @@
 				<th>主机名</th>
 				<th>内网IP</th>
 				<th>外网IP</th>
-				<th>Ssh端口</th>
+				<th>SSh端口</th>
 				<th>内存</th>
 				<th>CPU</th>
 				<th>品牌型号</th>
@@ -73,28 +73,32 @@
 
 		<tbody>
 
-			{% for d in data reversed %}
+			{% for d in data  %}
 			<tr>
 				<td>{{d.id}}</td>
 				<td>{{d.hostname}}</td>
 				<td>{{d.lan_ip}}</td>
-				<td>{{d.wan_ip}}</td>
+				{% ifequal d.wan_ip None %}
+					<td></td>
+				{% else %}
+					<td>{{d.wan_ip}}</td>
+				{% endifequal %}
 				<td>{{d.port}}</td>
 				<td>{{d.memory}}</td>
 				<td>{{d.cpu}}</td>
 				<td>{{d.brand}}</td>
 				<td>{{d.os}}</td>
 				{% ifequal d.status.name 'online' %}
-				<td class="success">{{d.status.name}}</td>
+					<td class="success">{{d.status.name}}</td>
 				{% else %}
-				<td class="danger">{{d.status.name}}</td>
+					<td class="danger">{{d.status.name}}</td>
 				{% endifequal %}
 				<td>{{d.hostgroup}}</td>
 				<td>{{d.create_at|date:"Y-m-d H:i:s"}}</td>
 				<td>{{d.update_at|date:"Y-m-d H:i:s"}}</td>
 				<td>
 					<a onclick='EditItem(this);' class='label label-success'>编辑</a>
-					<a onclick='DeleteItem(this);' class='label label-danger''>删除</a
+					<a onclick='DeleteItem(this);' class='label label-danger'>删除</a>
 				</td>
 			</tr>
 			{% endfor %}
@@ -155,7 +159,7 @@
 			</p>
 
 			<p>
-				<label for='port'>Ssh端口：</label>
+				<label for='port'>SSh端口：</label>
 				<input type='text' id='port' name='port' />
 			</p>
 

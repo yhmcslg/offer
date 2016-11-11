@@ -33,7 +33,7 @@ from django.core.management.sql import sql_all
 
 from third import handle_uploaded
 
-from offer.settings import BASE_DIR
+from offer.settings import BASE_DIR,PAGE_SIZE
 
 import json
 
@@ -293,12 +293,12 @@ def new_task(request):
                         host = models.Host.objects.get(hostname=host_name)
       
                         if  host.status.name == "online":
-                            ssh = paramiko.SSHClient()
-                            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-                            ssh.connect(host.wan_ip or host.lan_ip,22,'root',key_filename='D:\Documents\Identity')
-                            #ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-                            #ssh.connect(str(host.lan_ip),22,"root","123456")
-                            stdin, stdout, stderr = ssh.exec_command(task_content)
+                            SSh = paramiko.SShClient()
+                            SSh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                            SSh.connect(host.wan_ip or host.lan_ip,22,'root',key_filename='D:\Documents\Identity')
+                            #SSh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                            #SSh.connect(str(host.lan_ip),22,"root","123456")
+                            stdin, stdout, stderr = SSh.exec_command(task_content)
                         
                             std_out = stdout.readlines()
                             if  std_out:
@@ -324,10 +324,10 @@ def new_task(request):
                                 
                                 remote_upload_dirname = os.path.join('/tmp','upload',username)
                                 remote_upload_dirname = remote_upload_dirname.replace('\\','/')
-                                stdin, stdout, stderr = ssh.exec_command('ls -ld %s'%remote_upload_dirname.replace('\\','/'))
+                                stdin, stdout, stderr = SSh.exec_command('ls -ld %s'%remote_upload_dirname.replace('\\','/'))
                                 
                                 if not stdout.readlines():
-                                    stdin, stdout, stderr = ssh.exec_command('mkdir -p %s'%remote_upload_dirname)
+                                    stdin, stdout, stderr = SSh.exec_command('mkdir -p %s'%remote_upload_dirname)
                                 
                                 for f_name in upload_filename:
                                     remotepath=os.path.join(remote_upload_dirname,f_name)
@@ -342,7 +342,7 @@ def new_task(request):
                         
          
                             
-                            ssh.close()
+                            SSh.close()
                 else:
                     
                     for host_name in models.Host.objects.filter(hostgroup_id = task_hostsgroup.id):
@@ -359,12 +359,12 @@ def new_task(request):
                         
       
                         
-                            ssh = paramiko.SSHClient()
-                            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-                            ssh.connect(host.wan_ip or host.lan_ip,22,'root',key_filename='D:\Documents\Identity')
-                            #ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-                            #ssh.connect(str(host.lan_ip),22,"root","123456")
-                            stdin, stdout, stderr = ssh.exec_command(task_content)
+                            SSh = paramiko.SShClient()
+                            SSh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                            SSh.connect(host.wan_ip or host.lan_ip,22,'root',key_filename='D:\Documents\Identity')
+                            #SSh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                            #SSh.connect(str(host.lan_ip),22,"root","123456")
+                            stdin, stdout, stderr = SSh.exec_command(task_content)
                         
                             std_out = stdout.readlines()
                             if  std_out:
@@ -390,10 +390,10 @@ def new_task(request):
                                 
                                 remote_upload_dirname = os.path.join('/tmp','upload',username)
                                 remote_upload_dirname = remote_upload_dirname.replace('\\','/')
-                                stdin, stdout, stderr = ssh.exec_command('ls -ld %s'%remote_upload_dirname.replace('\\','/'))
+                                stdin, stdout, stderr = SSh.exec_command('ls -ld %s'%remote_upload_dirname.replace('\\','/'))
                                 
                                 if not stdout.readlines():
-                                    stdin, stdout, stderr = ssh.exec_command('mkdir -p %s'%remote_upload_dirname)
+                                    stdin, stdout, stderr = SSh.exec_command('mkdir -p %s'%remote_upload_dirname)
                                 
                                 for f_name in upload_filename:
                                     remotepath=os.path.join(remote_upload_dirname,f_name)
@@ -408,7 +408,7 @@ def new_task(request):
                         
          
                             
-                            ssh.close()            
+                            SSh.close()            
             except Exception,e:
                 print e
             if task_hostsgroup:
@@ -435,7 +435,7 @@ def task_detail(request,page):
     
     count = models.Task.objects.all().count()
 
-    pageObj = html_helper_bootstarp.PageInfo(page,count,peritems=2)
+    pageObj = html_helper_bootstarp.PageInfo(page,count,peritems=PAGE_SIZE)
 
     result = models.Task.objects.all().order_by('-id')[pageObj.From:pageObj.To]
 
@@ -498,7 +498,7 @@ def task_log(request,page):
 
     count = models.TaskLog.objects.filter().count()
 
-    pageObj = html_helper_bootstarp.PageInfo(page,count,peritems=10)
+    pageObj = html_helper_bootstarp.PageInfo(page,count,peritems=PAGE_SIZE)
     
     status_id = request.GET.get('status_id')
     
@@ -642,9 +642,9 @@ def host_list(request):
     if host_group_id and hoststatus_id:
         count = models.Host.objects.filter(hostgroup_id=host_group_id,status_id=hoststatus_id).count()
 
-        pageObj = html_helper_bootstarp.PageInfo(page,count,peritems=2)
+        pageObj = html_helper_bootstarp.PageInfo(page,count,peritems=PAGE_SIZE)
 
-        results = models.Host.objects.filter(hostgroup_id=host_group_id,status_id=hoststatus_id)[pageObj.From:pageObj.To]
+        results = models.Host.objects.filter(hostgroup_id=host_group_id,status_id=hoststatus_id).order_by("-id")[pageObj.From:pageObj.To]
 
         page_str = '?page_id=%d&hostgroup_id=%d&hoststatus_id=%d'%(page,host_group_id,hoststatus_id)
 
@@ -656,9 +656,9 @@ def host_list(request):
     elif host_group_id:
         count = models.Host.objects.filter(hostgroup_id=host_group_id).count()
 
-        pageObj = html_helper_bootstarp.PageInfo(page,count,peritems=2)
+        pageObj = html_helper_bootstarp.PageInfo(page,count,peritems=PAGE_SIZE)
 
-        results = models.Host.objects.filter(hostgroup_id=host_group_id)[pageObj.From:pageObj.To]
+        results = models.Host.objects.filter(hostgroup_id=host_group_id).order_by("-id")[pageObj.From:pageObj.To]
 
         page_str = '?page_id=%d&hostgroup_id=%d'%(page,host_group_id)
         
@@ -669,9 +669,9 @@ def host_list(request):
     elif hoststatus_id:
         count = models.Host.objects.filter(status_id=hoststatus_id).count()
 
-        pageObj = html_helper_bootstarp.PageInfo(page,count,peritems=2)
+        pageObj = html_helper_bootstarp.PageInfo(page,count,peritems=PAGE_SIZE)
 
-        results = models.Host.objects.filter(status_id=hoststatus_id)[pageObj.From:pageObj.To]
+        results = models.Host.objects.filter(status_id=hoststatus_id).order_by("-id")[pageObj.From:pageObj.To]
 
         page_str = '?page_id=%d&hoststatus_id=%d'%(page,hoststatus_id)
 
@@ -680,15 +680,15 @@ def host_list(request):
     else:
         count = models.Host.objects.all().count()
 
-        pageObj = html_helper_bootstarp.PageInfo(page,count,peritems=2)
+        pageObj = html_helper_bootstarp.PageInfo(page,count,peritems=PAGE_SIZE)
 
-        results = models.Host.objects.all()[pageObj.From:pageObj.To]
+        results = models.Host.objects.all().order_by("-id")[pageObj.From:pageObj.To]
 
         page_string = html_helper_bootstarp.Custompager('/cmdb/host_list_s/',page,pageObj.TotalPage)                           
            
 
     ret = {'data':results,'count':count,'page_number':pageObj.TotalPage,'currentPage':page,'page':page_string}
-
+    
     return render_to_response('cmdb/cmdb_host_list.html',
                               ret,
                               context_instance=RequestContext(request)
@@ -765,10 +765,10 @@ def host_list_s(request):
         
         count = 1
 
-        pageObj = html_helper_bootstarp.PageInfo(page,count,peritems=2)
+        pageObj = html_helper_bootstarp.PageInfo(page,count,peritems=PAGE_SIZE)
 
 
-        results = models.Host.objects.filter(Q(hostname__contains = text_ip_hostname) | Q(lan_ip__contains = text_ip_hostname) | Q(wan_ip__contains = text_ip_hostname))
+        results = models.Host.objects.filter(Q(hostname__contains = text_ip_hostname) | Q(lan_ip__contains = text_ip_hostname) | Q(wan_ip__contains = text_ip_hostname)).order_by("-id")
  
         str1 = '''
                 <div id="host_list_conditions" class="table-responsive">
@@ -779,7 +779,7 @@ def host_list_s(request):
                         <th>主机名</th>
                         <th>内网IP</th>
                         <th>外网IP</th>
-                        <th>Ssh端口</th>
+                        <th>SSh端口</th>
                         <th>内存</th>
                         <th>CPU</th>
                         <th>品牌型号</th>
@@ -837,9 +837,9 @@ def host_list_s(request):
 
         count = models.Host.objects.filter(hostgroup_id=host_group_id,status_id=hoststatus_id).count()
 
-        pageObj = html_helper_bootstarp.PageInfo(page,count,peritems=2)
+        pageObj = html_helper_bootstarp.PageInfo(page,count,peritems=PAGE_SIZE)
 
-        results = models.Host.objects.filter(hostgroup_id=host_group_id,status_id=hoststatus_id)[pageObj.From:pageObj.To]
+        results = models.Host.objects.filter(hostgroup_id=host_group_id,status_id=hoststatus_id).order_by("-id")[pageObj.From:pageObj.To]
         
         str1 = '''
                 <div id="host_list_conditions" class="table-responsive">
@@ -850,7 +850,7 @@ def host_list_s(request):
                         <th>主机名</th>
                         <th>内网IP</th>
                         <th>外网IP</th>
-                        <th>Ssh端口</th>
+                        <th>SSh端口</th>
                         <th>内存</th>
                         <th>CPU</th>
                         <th>品牌型号</th>
@@ -925,9 +925,9 @@ def host_list_s(request):
     elif host_group_id:
         count = models.Host.objects.filter(hostgroup_id=host_group_id).count()
 
-        pageObj = html_helper_bootstarp.PageInfo(page,count,peritems=2)
+        pageObj = html_helper_bootstarp.PageInfo(page,count,peritems=PAGE_SIZE)
 
-        results = models.Host.objects.filter(hostgroup_id=host_group_id)[pageObj.From:pageObj.To]
+        results = models.Host.objects.filter(hostgroup_id=host_group_id).order_by("-id")[pageObj.From:pageObj.To]
         
         str1 = '''
                 <div id="host_list_conditions" class="table-responsive">
@@ -938,7 +938,7 @@ def host_list_s(request):
                         <th>主机名</th>
                         <th>内网IP</th>
                         <th>外网IP</th>
-                        <th>Ssh端口</th>
+                        <th>SSh端口</th>
                         <th>内存</th>
                         <th>CPU</th>
                         <th>品牌型号</th>
@@ -1013,9 +1013,9 @@ def host_list_s(request):
     elif hoststatus_id:
         count = models.Host.objects.filter(status_id=hoststatus_id).count()
 
-        pageObj = html_helper_bootstarp.PageInfo(page,count,peritems=2)
+        pageObj = html_helper_bootstarp.PageInfo(page,count,peritems=PAGE_SIZE)
 
-        results = models.Host.objects.filter(status_id=hoststatus_id)[pageObj.From:pageObj.To]
+        results = models.Host.objects.filter(status_id=hoststatus_id).order_by("-id")[pageObj.From:pageObj.To]
 
         str1 = '''
                 <div id="host_list_conditions" class="table-responsive">
@@ -1026,7 +1026,7 @@ def host_list_s(request):
                         <th>主机名</th>
                         <th>内网IP</th>
                         <th>外网IP</th>
-                        <th>Ssh端口</th>
+                        <th>SSh端口</th>
                         <th>内存</th>
                         <th>CPU</th>
                         <th>品牌型号</th>
@@ -1048,9 +1048,9 @@ def host_list_s(request):
                 
             if not result.wan_ip:
                 result.wan_ip = ''                
-                
+ 
             str2='''<tr>
-                <td>%s</td>
+                <td>%d</td>
                 <td>%s</td>
                 <td>%s</td>
                 <td>%s</td>
@@ -1058,7 +1058,8 @@ def host_list_s(request):
                 <td>%s</td>
                 <td>%s</td>
                 <td>%s</td>
-                %s>
+                <td>%s</td>
+                %s
                 <td>%s</td>
                 <td>%s</td>
                 <td>%s</td>
@@ -1067,8 +1068,9 @@ def host_list_s(request):
                     <a onclick='DeleteItem(this);' class='label label-danger''>删除</a
                 </td>
             </tr>
-            '''%(result.id,result.hostname,result.lan_ip,result.wan_ip,result.port,result.memory,result.cpu,result.brand,result.os,s,result.hostgroup,result.create_at,result.update_at)
-   
+            '''%(result.id,result.hostname,result.lan_ip,result.wan_ip,result.port,result.memory,result.cpu,result.brand,result.os,
+                 s,result.hostgroup,result.create_at,result.update_at)
+
             str1 = str1 + str(str2)    
         
         str1 += '''
@@ -1097,9 +1099,9 @@ def host_list_s(request):
     else:
         count = models.Host.objects.all().count()
 
-        pageObj = html_helper_bootstarp.PageInfo(page,count,peritems=2)
+        pageObj = html_helper_bootstarp.PageInfo(page,count,peritems=PAGE_SIZE)
 
-        results = models.Host.objects.all()[pageObj.From:pageObj.To]
+        results = models.Host.objects.all().order_by("-id")[pageObj.From:pageObj.To]
 
         str1 = '''
                 <div id="host_list_conditions" class="table-responsive">
@@ -1110,7 +1112,7 @@ def host_list_s(request):
                         <th>主机名</th>
                         <th>内网IP</th>
                         <th>外网IP</th>
-                        <th>Ssh端口</th>
+                        <th>SSh端口</th>
                         <th>内存</th>
                         <th>CPU</th>
                         <th>品牌型号</th>
@@ -1193,7 +1195,7 @@ def host_group_list(request):
         
         count = models.HostGroup.objects.all().count()
 
-        pageObj = html_helper_bootstarp.PageInfo(page_id,count,peritems=2)
+        pageObj = html_helper_bootstarp.PageInfo(page_id,count,peritems=PAGE_SIZE)
 
         results = models.HostGroup.objects.all()[pageObj.From:pageObj.To]
    
@@ -1250,7 +1252,7 @@ def host_group_list(request):
     
         count = models.HostGroup.objects.all().count()
     
-        pageObj = html_helper_bootstarp.PageInfo(page,count,peritems=2)
+        pageObj = html_helper_bootstarp.PageInfo(page,count,peritems=PAGE_SIZE)
     
         results = models.HostGroup.objects.all()[pageObj.From:pageObj.To]
     
@@ -1326,7 +1328,7 @@ def host_group_update_add(request):
             print e
         count = models.HostGroup.objects.all().count()
 
-        pageObj = html_helper_bootstarp.PageInfo(page_id,count,peritems=2)
+        pageObj = html_helper_bootstarp.PageInfo(page_id,count,peritems=PAGE_SIZE)
 
         results = models.HostGroup.objects.all()[pageObj.From:pageObj.To]
    
@@ -1408,7 +1410,7 @@ def host_group_del(request):
             
         count = models.HostGroup.objects.all().count()
 
-        pageObj = html_helper_bootstarp.PageInfo(page_id,count,peritems=2)
+        pageObj = html_helper_bootstarp.PageInfo(page_id,count,peritems=PAGE_SIZE)
 
         results = models.HostGroup.objects.all()[pageObj.From:pageObj.To]
    

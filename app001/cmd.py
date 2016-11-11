@@ -486,6 +486,55 @@ def get_svn_info(request):
         print line.encode('utf8')
     return HttpResponse(json.dumps(resutl),content_type="application/json")  
 
+
+@login_dresser  
+def select_svn(request):
+    
+    username = request.COOKIES.get('username_password')
+    
+    if username:
+        username = username.split('&')[0]
+    
+    host_ids = request.POST.getlist('host_id[]')
+    
+    target_path_name = request.POST.get('target_path_name')
+    
+    result = []
+    
+    i = 1
+    
+    if not host_ids:
+        
+        L1 = {"id":i,"svn_info":u"请选择主机<br />"}
+        
+        result.append(L1)
+        
+        return HttpResponse(json.dumps(result),content_type="application/json") 
+    else:
+        for host_id in host_ids:
+            host = models.Host.objects.get(id=host_id)
+
+        cmd_content = '''
+            svn info %s
+        '''%target_path_name
+
+        username_s = 'root'
+
+        th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,'',username,''))
+
+        th.start()
+        
+        th.join()
+
+        contents = ''
+        
+        q.reverse()
+       
+        for j in range(len(q)):
+            contents +=  q.pop()
+            print contents 
+        return HttpResponse(contents) 
+
 @login_dresser
 def cmd_detail(request,page):
     username = request.COOKIES.get('username_password').split('&')[0]

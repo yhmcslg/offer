@@ -110,9 +110,15 @@
 								<tr>
 
 									<td align="left">
-										<input type="button" name="Submit_run1" value="运  行"
+										<input type="button" name="Submit_run1" value="更新版本"
 											id="sys_run_button" onClick="return update_svn();">
 										&nbsp;&nbsp;
+										
+										<input type="button" name="Submit_run1" value="查看版本号"
+											id="sys_run_button" onClick="return select_svn();">
+										&nbsp;&nbsp;
+										
+										
 										<input type="button" name="Submit_ref2" value="刷  屏"
 											id="sys_run_button" onClick="return clear_screen();">
 									</td>
@@ -284,8 +290,6 @@
 		var hostgroup_id = $("#hostgroup_name").val();
 		var host_id = $("#host_ip").val();
 
-		console.log("svn_version:");
-		console.log(svn_version);
 
 		$.ajax({
 			type : "POST",
@@ -314,9 +318,7 @@
 
 	function get_svn_info() {
 		var change_code_url = $("#change_code_url option:selected").text().split(' ')[1];
-		
-		console.log(change_code_url);
-		
+
 		$("#target_path_name").val("/data/www/" + change_code_url.split('/').pop());
 
 		$.ajax({
@@ -352,6 +354,44 @@
 
 				});
 
+	}
+	
+	
+	
+	function select_svn(){
+		var change_code_url = $("#change_code_url option:selected").text().split(' ')[1];
+
+		var target_path_name  = $("#target_path_name").val();
+		
+		var hostgroup_id = $("#hostgroup_name").val();
+		
+		var host_id = $("#host_ip").val();
+		
+		console.log(target_path_name);
+		
+		$.ajax({
+			type : "POST",
+			data : {
+				'host_id' : host_id,
+				'target_path_name' : target_path_name
+			},
+
+			url : "/cmdb/select_svn/",
+
+			success : function(data, textStatus) {
+
+				if (textStatus == 'success') {
+
+					if (data.length > 0) {
+						var content = $("#ajaxmodulerunresult").html();
+						$("#ajaxmodulerunresult").html(data + content);
+					}
+				
+				}
+			}
+
+		});
+		
 	}
 </script>
 

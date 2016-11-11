@@ -48,10 +48,10 @@ urlpatterns = [
     url(r'^cmdb/cmd_hostname/',cmd.cmd_hostname),
     url(r'^cmdb/cmd_run/',cmd.cmd_run),
     url(r'^cmdb/cmd_code_release/',cmd.cmd_code_release),
-     
     
     url(r'^cmdb/update_svn/',cmd.update_svn),
     url(r'^cmdb/get_svn_info/',cmd.get_svn_info),
+    url(r'^cmdb/select_svn/',cmd.select_svn),
     url(r'^cmdb/cmd_detail/(\d+)?',cmd.cmd_detail),
     url(r'^cmdb/cmd_log/(\d+)?',cmd.cmd_log),
     url(r'^cmdb/del_cmdb_log/',cmd.del_cmdb_log),

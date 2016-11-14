@@ -367,13 +367,13 @@
 		
 		var host_id = $("#host_ip").val();
 		
-		console.log(target_path_name);
-		
 		$.ajax({
 			type : "POST",
 			data : {
 				'host_id' : host_id,
-				'target_path_name' : target_path_name
+				'target_path_name' : target_path_name,
+				'hostgroup_id' : hostgroup_id,
+				'change_code_url' : change_code_url,
 			},
 
 			url : "/cmdb/select_svn/",
@@ -381,7 +381,6 @@
 			success : function(data, textStatus) {
 
 				if (textStatus == 'success') {
-
 					if (data.length > 0) {
 						var content = $("#ajaxmodulerunresult").html();
 						$("#ajaxmodulerunresult").html(data + content);

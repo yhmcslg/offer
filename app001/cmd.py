@@ -492,35 +492,64 @@ def select_svn(request):
     
     username = request.COOKIES.get('username_password')
     
+    username_s = 'root'
+    
+    target_path_name = request.POST.get('target_path_name')
+    
+    cmd_content = '''
+            svn info %s
+    '''%target_path_name
+        
+        
     if username:
         username = username.split('&')[0]
     
     host_ids = request.POST.getlist('host_id[]')
     
-    target_path_name = request.POST.get('target_path_name')
+    hostgroup_ids = request.POST.getlist('hostgroup_id[]')
     
-    result = []
+    change_code_url = request.POST.getlist('change_code_url')
     
-    i = 1
     
-    if not host_ids:
+
+     
+    if not change_code_url:
+        return HttpResponse('请选择源SVN地址<br/>')
+    
+    elif not  target_path_name :
+        return HttpResponse('请输入目标地址<br/>')
+    
+    elif hostgroup_ids:
         
-        L1 = {"id":i,"svn_info":u"请选择主机<br />"}
+        ths = []
+        for hostgroup_id in hostgroup_ids:
+            for host in models.Host.objects.filter(hostgroup=models.HostGroup.objects.get(id=hostgroup_id),status=models.HostStatus.objects.get(name='online')):
+                th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username,hostgroup_id))
+                ths.append(th)
+    
+            for i in ths:
+                i.setDaemon(False)    
+                i.start()
+            for i in ths:    
+                i.join()  
+            
+        contents = ''
         
-        result.append(L1)
-        
-        return HttpResponse(json.dumps(result),content_type="application/json") 
+        q.reverse()
+       
+        for j in range(len(q)):
+            contents +=  q.pop()
+            print contents 
+        return HttpResponse(contents)  
+       
+
+    elif not host_ids:  
+        return HttpResponse("请选择主机!<br />") 
     else:
         for host_id in host_ids:
             host = models.Host.objects.get(id=host_id)
 
-        cmd_content = '''
-            svn info %s
-        '''%target_path_name
-
-        username_s = 'root'
-
-        th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,'',username,''))
+        th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,'',username,hostgroup_id))
 
         th.start()
         
@@ -691,14 +720,14 @@ def nt_floor(request):
         for i in ths:    
             i.join()  
                     
-            contents = ''
-            
-            q.reverse()
-           
-            for j in range(len(q)):
-                contents +=  q.pop()
-                print contents 
-            return HttpResponse(contents) 
+        contents = ''
+        
+        q.reverse()
+       
+        for j in range(len(q)):
+            contents +=  q.pop()
+            print contents 
+        return HttpResponse(contents) 
            
     elif hostgroup_ids:
         

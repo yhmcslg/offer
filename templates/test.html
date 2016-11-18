@@ -1,75 +1,28 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  </head>
+    <body>
+        <div>
+            <a href="myprotocol://">
+            执行可执行文件
+            </a>
+        </div>
+        
+        
+    <script src="/static/js/jquery-2.1.1.js"></script> 
+    
+    < script > 
 
+	function  hello ()  {
+	  netscape.security.PrivilegeManager.enablePrivilege("UniversalXPConnect");
+	  var file = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile);
+	  file.initWithPath("D:\program files\foobar2000\foobar2000.exe");
+	  file.launch();
+	} 
 
-<html>
-<head>
-
-</head>
-<body>
-	<a href="#" onclick="Run('putty.exe')">RUN EXE</a>
-
-
-
-
-	<table width="20%" cellspacing="1" cellpadding="0" border="1">
-	
-			
-			<tr>
-				<td>
-					<select id="host_ip" class="sys_server_select" name="host_ip" size="40" multiple=""
-						style="background-color: rgb(214, 214, 255);">
-						<option value="20">host_241__192.168.1.241__22</option>
-						<option value="18">host_15__192.168.1.15__22</option>
-					</select>
-				</td>
-			</tr>
-		
-	</table>
-
-<div id="alertTest" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-        <h3 id="myModalLabel">提示标题</h3>
-    </div>
-    <div class="modal-body">
-        <p>提示内容！</p>
-    </div>
-    <div class="modal-footer">
-        <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
-    </div>
-</div>
-
-
-<script src="/static/js/jquery-2.1.1.min.js"></script>
-<script language="javascript">
-
-	$(function() {
-		 $('#host_ip option').hover(
-					function(){
-		             alert('mouseenter function is running !');
-		            },
-		            function(){
-		                    alert('mouseleaver function is running !');
-		            });	
-	
-	});
-
-
-	function Run(strPath) //only for ie
-	{
-		try {
-			var objShell = new ActiveXObject("wscript.shell");
-			objShell.CurrentDirectory = "D:\\";
-			//设置当前路径很重要，能让exe程序解决 相对路径问题 （否则会在html所在路径找）
-			objShell.Run(strPath);
-			objShell = null;
-		} catch (e) {
-			alert(e.message);
-		}
-
-	}
-</script>
-
-
-
-</body>
+</ script >
+       
+    </body>
 </html>

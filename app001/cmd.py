@@ -71,6 +71,7 @@ q = []
 
 
 def ssh2(ip,hostname,port,username,cmd_content,files,login_username,hostgroup_ids):
+    
     content = ''
 
     dir_name = os.path.join(BASE_DIR,'upload',login_username)
@@ -109,7 +110,7 @@ def ssh2(ip,hostname,port,username,cmd_content,files,login_username,hostgroup_id
     else:
         sql = '''insert into task(name,content,kick_off_at,description,execute_type_id,create_time,file,hostsgroup_id,task_template_id)
                 values("%s","%s","%s","%s","%s","%s","%s","%s","%s");
-            '''%(u'立即执行命令',cmd_content,datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),'',4,datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),'',hostgroup_ids,'')            
+            '''%(u'立即执行命令',cmd_content.replace('"',"'"),datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),'',4,datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),'',hostgroup_ids,'')            
 
         cursor.execute(sql)
         
@@ -299,7 +300,7 @@ def cmd_run(request):
                 if hostgroup == 0:
                     hosts = models.Host.objects.filter(status=models.HostStatus.objects.get(name='online'))
                     for host in hosts:
-                        th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username,hostgroup_ids))
+                        th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username,','.join(eval(hostgroup_ids))))
                         ths.append(th)
 
                     for i in ths:
@@ -310,7 +311,7 @@ def cmd_run(request):
   
                 else:
                     for host in models.Host.objects.filter(hostgroup=models.HostGroup.objects.get(id=hostgroup),status=models.HostStatus.objects.get(name='online')):
-                        th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username,hostgroup_ids))
+                        th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username,','.join(eval(hostgroup_ids))))
                         ths.append(th)
                         
                     for i in ths:
@@ -393,7 +394,7 @@ def update_svn(request):
             for host in host_ids:
                 host = models.Host.objects.get(id=host)
 
-                th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username,hostgroup_ids))
+                th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username,','.join(eval(hostgroup_ids))))
                 ths.append(th)
 
             for i in ths:
@@ -427,7 +428,7 @@ def update_svn(request):
                 if hostgroup == 0:
                     hosts = models.Host.objects.filter(status=models.HostStatus.objects.get(name='online'))
                     for host in hosts:
-                        th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username,hostgroup_ids))
+                        th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username,','.join(eval(hostgroup_ids))))
                         ths.append(th)
 
                     for i in ths:
@@ -438,7 +439,7 @@ def update_svn(request):
   
                 else:
                     for host in models.Host.objects.filter(hostgroup=models.HostGroup.objects.get(id=hostgroup),status=models.HostStatus.objects.get(name='online')):
-                        th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username,hostgroup_ids))
+                        th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username,','.join(eval(hostgroup_ids))))
                         ths.append(th)
                         
                     for i in ths:
@@ -491,7 +492,10 @@ def get_svn_info(request):
 def select_svn(request):
     
     username = request.COOKIES.get('username_password')
-    
+  
+    if username:
+        username = username.split('&')[0]
+        
     username_s = 'root'
     
     target_path_name = request.POST.get('target_path_name')
@@ -499,10 +503,7 @@ def select_svn(request):
     cmd_content = '''
             svn info %s
     '''%target_path_name
-        
-        
-    if username:
-        username = username.split('&')[0]
+
     
     host_ids = request.POST.getlist('host_id[]')
     
@@ -524,14 +525,14 @@ def select_svn(request):
         ths = []
         for hostgroup_id in hostgroup_ids:
             for host in models.Host.objects.filter(hostgroup=models.HostGroup.objects.get(id=hostgroup_id),status=models.HostStatus.objects.get(name='online')):
-                th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username,hostgroup_id))
+                th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username,','.join(eval(hostgroup_ids))))
                 ths.append(th)
     
-            for i in ths:
-                i.setDaemon(False)    
-                i.start()
-            for i in ths:    
-                i.join()  
+        for i in ths:
+            i.setDaemon(False)    
+            i.start()
+        for i in ths:    
+            i.join()  
             
         contents = ''
         
@@ -549,7 +550,7 @@ def select_svn(request):
         for host_id in host_ids:
             host = models.Host.objects.get(id=host_id)
 
-        th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,'',username,hostgroup_id))
+        th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,'',username,','.join(eval(hostgroup_ids))))
 
         th.start()
         
@@ -711,7 +712,7 @@ def nt_floor(request):
         for host in host_ids:
             host = models.Host.objects.get(id=host)
 
-            th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username))
+            th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username,','.join(eval(hostgroup_ids))))
             ths.append(th)
 
         for i in ths:
@@ -739,7 +740,7 @@ def nt_floor(request):
             if hostgroup == 0:
                 hosts = models.Host.objects.filter(status=models.HostStatus.objects.get(name='online'))
                 for host in hosts:
-                    th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username))
+                    th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username,','.join(eval(hostgroup_ids))))
                     ths.append(th)
 
                 for i in ths:
@@ -750,7 +751,7 @@ def nt_floor(request):
 
             else:
                 for host in models.Host.objects.filter(hostgroup=models.HostGroup.objects.get(id=hostgroup),status=models.HostStatus.objects.get(name='online')):
-                    th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username))
+                    th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username,','.join(eval(hostgroup_ids))))
                     ths.append(th)
                     
                 for i in ths:
@@ -807,7 +808,7 @@ def pic_floor(request):
         for host in host_ids:
             host = models.Host.objects.get(id=host)
 
-            th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username))
+            th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username,','.join(eval(hostgroup_ids))))
             ths.append(th)
 
         for i in ths:
@@ -816,14 +817,14 @@ def pic_floor(request):
         for i in ths:    
             i.join()  
                     
-            contents = ''
-            
-            q.reverse()
-           
-            for j in range(len(q)):
-                contents +=  q.pop()
-                print contents 
-            return HttpResponse(contents) 
+        contents = ''
+        
+        q.reverse()
+       
+        for j in range(len(q)):
+            contents +=  q.pop()
+            print contents 
+        return HttpResponse(contents) 
            
     elif hostgroup_ids:
         
@@ -835,7 +836,7 @@ def pic_floor(request):
             if hostgroup == 0:
                 hosts = models.Host.objects.filter(status=models.HostStatus.objects.get(name='online'))
                 for host in hosts:
-                    th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username))
+                    th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username,','.join(eval(hostgroup_ids))))
                     ths.append(th)
 
                 for i in ths:
@@ -846,7 +847,7 @@ def pic_floor(request):
 
             else:
                 for host in models.Host.objects.filter(hostgroup=models.HostGroup.objects.get(id=hostgroup),status=models.HostStatus.objects.get(name='online')):
-                    th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username))
+                    th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username,','.join(eval(hostgroup_ids))))
                     ths.append(th)
                     
                 for i in ths:
@@ -888,16 +889,19 @@ def web_floor(request):
     username_s = 'root'
     
     cmd_content = '''
-        awk  '/%s\/%s\/2016/{++S[$1]} END {for(a in S) print a, S[a]}'  /var/log/nginx/access.log|sort -k 2 -nr
+        awk  '/%s\/%s\/2016/{++S[$1]} END {for(a in S) printf("%%-30s %%s\\n",a, S[a])}'  /var/log/nginx/access.log|sort -k 2 -nr
     '''%(datetime.datetime.now().strftime('%d'),datetime.datetime.now().strftime('%b'))
     
+    print cmd_content
+    print type(hostgroup_ids)
+    print hostgroup_ids
     if host_ids:
         contents = ''
         ths = []
         for host in host_ids:
             host = models.Host.objects.get(id=host)
 
-            th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username))
+            th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username,','.join(eval(str(hostgroup_ids)))))
             ths.append(th)
 
         for i in ths:
@@ -905,16 +909,16 @@ def web_floor(request):
             i.start()
         for i in ths:    
             i.join()  
-                    
-            contents = ''
-            
-            q.reverse()
-           
-            for j in range(len(q)):
-                contents +=  q.pop()
-                print contents 
-            return HttpResponse(contents) 
-           
+                
+        contents = ''
+        
+        q.reverse()
+       
+        for j in range(len(q)):
+            contents +=  q.pop()
+            print contents 
+        return HttpResponse(contents) 
+       
     elif hostgroup_ids:
         
         ths = []
@@ -925,7 +929,7 @@ def web_floor(request):
             if hostgroup == 0:
                 hosts = models.Host.objects.filter(status=models.HostStatus.objects.get(name='online'))
                 for host in hosts:
-                    th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username))
+                    th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username,','.join(eval(hostgroup_ids))))
                     ths.append(th)
 
                 for i in ths:
@@ -936,7 +940,7 @@ def web_floor(request):
 
             else:
                 for host in models.Host.objects.filter(hostgroup=models.HostGroup.objects.get(id=hostgroup),status=models.HostStatus.objects.get(name='online')):
-                    th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username))
+                    th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username,','.join(eval(hostgroup_ids))))
                     ths.append(th)
                     
                 for i in ths:
@@ -1015,7 +1019,7 @@ def mysql_return(request):
         for host in host_ids:
             host = models.Host.objects.get(id=host)
 
-            th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username))
+            th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username,','.join(eval(hostgroup_ids))))
             ths.append(th)
 
         for i in ths:
@@ -1042,7 +1046,7 @@ def mysql_return(request):
             if hostgroup == 0:
                 hosts = models.Host.objects.filter(status=models.HostStatus.objects.get(name='online'))
                 for host in hosts:
-                    th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username))
+                    th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username,','.join(eval(hostgroup_ids))))
                     ths.append(th)
 
                 for i in ths:
@@ -1053,7 +1057,7 @@ def mysql_return(request):
 
             else:
                 for host in models.Host.objects.filter(hostgroup=models.HostGroup.objects.get(id=hostgroup),status=models.HostStatus.objects.get(name='online')):
-                    th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username))
+                    th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username,','.join(eval(hostgroup_ids))))
                     ths.append(th)
                     
                 for i in ths:

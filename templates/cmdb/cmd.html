@@ -208,7 +208,7 @@
 						text : "用ShellInbox打开服务器",
 						func : function() {
 							var src = $(this).find('option:selected').text();
-							var ip = src.substring(src.indexOf("__") + 2);
+							var ip = src.split("__")[1];
 						
 							window.open("https://" + ip + ":4200");
 						}

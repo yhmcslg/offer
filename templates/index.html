@@ -1,20 +1,163 @@
-{% extends 'master/layout.html' %}
+{% extends 'master/layout.html' %} 
 
-{% block user %}
-	
-		{{ username }} -- {{ user_type }}
-	
-{% endblock %}
+{% block user %} 
 
-{% block js %}
+	{{ username }} -- {{ user_type }} 
+
+{% endblock %} 
+
+{% block page-content %}
+
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-sm-3 col-md-2 sidebar">
+
+			<ul class="nav nav-sidebar">
+				<li class="active">
+					<a href="#">API 图表</a>
+				</li>
+			</ul>
+
+			<ul class="nav nav-sidebar">
+				<li>
+					<a href="">...</a>
+				</li>
+			</ul>
+
+			<ul class="nav nav-sidebar">
+				<li>
+					<a href="">...</a>
+				</li>
+			</ul>
+		</div>
+
+
+
+		<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+			<h1 class="page-header">API 状态、时间图表</h1>
+
+			<div>
+					<label for="name">API地址:</label>
+					<select id="change_code_url" class="form-control"
+						name="change_code_url" onchange="get_svn_info()">
+						<option value="0" selected="selected">请选择API地址</option>
+						<option value="1">User : http://127.0.0.1:9000/cmdb/api/users/1/</option>
+						<option value="2">Group : http://127.0.0.1:9000/cmdb/api/groups/1/</option>
+						<option value="3">HostStatus : http://127.0.0.1:9000/cmdb/api/HostStatus/0/</option>
+						<option value="4">欧孚科技 : https://192.168.1.12/svn/BridgehrKit/VISS/solution/Online/Notice</option>
+						<option value="5">企业号 : https://192.168.1.12/svn/BridgehrKit/VISS/solution/Online/qy</option>
+						<option value="6">测试 : https://192.168.1.239:8443/svn/9191offer/offer</option>
+					</select>
+				</div>
+
+
+					<div id="container" style="min-width:700px;height:400px"></div>
+		</div>
+	</div>
+</div>
+
+{% endblock %} {% block js %}
+		
+	<script type="text/javascript" src="/static/js/highcharts.js"></script>
+	<script type="text/javascript" src="/static/js/exporting.js"></script>
+		
 	<script>
-				$(document).ready(function() {
-			
-				$("#index").css({
-					"color" : "red",
-					"font-size" : "20px"
-				});
+	
+		
+		$(document).ready(function() {
+	
+			$("#index").css({
+				"color" : "red",
+				"font-size" : "20px"
 			});
+			
+			
+			Highcharts.setOptions({
+	        	timezoneOffset: -8
+	    	});
+	    	
+		    $.getJSON(
+		    	'http://datas.org.cn/jsonp?filename=json/usdeur.json&callback=?', 
+		    	function (data) {
+			        $('#container').highcharts({
+			            chart: {
+			                zoomType: 'x'
+			            },
+			            title: {
+			                text: '美元兑欧元汇率走势图'
+			            },
+			            subtitle: {
+			                text: document.ontouchstart === undefined ?
+			                '鼠标拖动可以进行缩放' : '手势操作进行缩放'
+			            },
+			            xAxis: {
+			                type: 'datetime',
+			                dateTimeLabelFormats: {
+			                    millisecond: '%H:%M:%S.%L',
+			                    second: '%H:%M:%S',
+			                    minute: '%H:%M',
+			                    hour: '%H:%M',
+			                    day: '%m-%d',
+			                    week: '%m-%d',
+			                    month: '%Y-%m',
+			                    year: '%Y'
+			                }
+			            },
+			            tooltip: {
+			                dateTimeLabelFormats: {
+			                    millisecond: '%H:%M:%S.%L',
+			                    second: '%H:%M:%S',
+			                    minute: '%H:%M',
+			                    hour: '%H:%M',
+			                    day: '%Y-%m-%d',
+			                    week: '%m-%d',
+			                    month: '%Y-%m',
+			                    year: '%Y'
+			                }
+			            },
+			            yAxis: {
+			                title: {
+			                    text: 'Exchange rate'
+			                }
+			            },
+			            legend: {
+			                enabled: false
+			            },
+			            plotOptions: {
+			                area: {
+			                    fillColor: {
+			                        linearGradient: {
+			                            x1: 0,
+			                            y1: 0,
+			                            x2: 0,
+			                            y2: 1
+			                        },
+			                        stops: [
+			                            [0, Highcharts.getOptions().colors[0]],
+			                            [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+			                        ]
+			                    },
+			                    marker: {
+			                        radius: 2
+			                    },
+			                    lineWidth: 1,
+			                    states: {
+			                        hover: {
+			                            lineWidth: 1
+			                        }
+			                    },
+			                    threshold: null
+			                }
+			            },
+			            series: [{
+			                type: 'area',
+			                name: '美元兑欧元',
+			                data: data
+			            }]
+			        });
+		    	});
+	
+		});
 	</script>
 {% endblock %}
 

@@ -24,7 +24,11 @@ urlpatterns = [
      
     url(r'^test/(\d+)?',views.test),
     
+    url(r'^bootstrap/(\d+)?',views.bootstrap),
+    
     url(r'^user_info/$',views.user_info),
+    
+    url(r'^weichat/', views.weichat),
     
     url(r'^', include('app001.urls')),
 

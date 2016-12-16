@@ -59,26 +59,22 @@
 {% endblock %} {% block js %}
 		
 	<script type="text/javascript" src="/static/js/highcharts.js"></script>
-	<script type="text/javascript" src="/static/js/exporting.js"></script>
 		
 	<script>
 	
-		
-		$(document).ready(function() {
+
+			$(function () {
+				
+				$("#index").css({
+					"color" : "red",
+					"font-size" : "20px"
+				});
+				
 	
-			$("#index").css({
-				"color" : "red",
-				"font-size" : "20px"
-			});
-			
-			
-			Highcharts.setOptions({
-	        	timezoneOffset: -8
-	    	});
-	    	
-		    $.getJSON(
-		    	'http://datas.org.cn/jsonp?filename=json/usdeur.json&callback=?', 
-		    	function (data) {
+			    Highcharts.setOptions({
+			        timezoneOffset: -8
+			    });
+			    $.getJSON('http://datas.org.cn/jsonp?filename=json/usdeur.json&callback=?', function (data) {
 			        $('#container').highcharts({
 			            chart: {
 			                zoomType: 'x'
@@ -155,9 +151,8 @@
 			                data: data
 			            }]
 			        });
-		    	});
-	
-		});
+			    });
+			});
 	</script>
 {% endblock %}
 

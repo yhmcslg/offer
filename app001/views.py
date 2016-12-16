@@ -2,7 +2,7 @@
 
 from django.shortcuts import  render_to_response,redirect,render
 from django.template import RequestContext  
-from django.http import  HttpResponse
+from django.http import  HttpResponse,HttpResponseBadRequest,HttpResponseRedirect
 #from django.views.decorators.http import require_http_methods
 # Create your views here.
 import os,sys,platform
@@ -10,8 +10,6 @@ reload(sys)
 
 if platform.system() == 'Linux':
     sys.setdefaultencoding('utf8')
-
-from django.http import HttpResponseRedirect
 
 from app001 import models
 
@@ -36,6 +34,8 @@ from third import handle_uploaded
 from offer.settings import BASE_DIR,PAGE_SIZE
 
 import json
+
+from django.views.decorators.csrf import csrf_exempt
 
 def login_dresser(func):
     def outer(request,*args,**kwargs):
@@ -133,6 +133,38 @@ def test(request,id):
         return HttpResponse(json.dumps(id),content_type="application/json")
     else:
         return render_to_response('test.html')
+    
+
+from third.WXBizMsgCrypt import WXBizMsgCrypt
+import xml.etree.cElementTree as ET 
+def weichat(request):
+    sToken = "sF2N55REDOsWYnVC6dACwwhNJum"
+    sEncodingAESKey = "fBSy5d73BFHjBnelPEFRyatfdzYXJlshNsTQV2Q7s8Y"
+    sCorpID = "wxc46f6030a14f2c73"
+    
+    wxcpt=WXBizMsgCrypt(sToken,sEncodingAESKey,sCorpID)
+
+    sVerifyMsgSig=request.GET.get('msg_signature')
+
+    sVerifyTimeStamp=request.GET.get('timestamp')
+
+    sVerifyNonce=request.GET.get('nonce')
+
+    sVerifyEchoStr=request.GET.get('echostr')
+    ret,sEchoStr=wxcpt.VerifyURL(sVerifyMsgSig, sVerifyTimeStamp,sVerifyNonce,sVerifyEchoStr)
+    
+    if(ret!=0):
+        result = "ERR: VerifyURL ret: %d"%ret
+        return HttpResponse(result)
+    
+    return HttpResponse(sEchoStr)
+
+
+def bootstrap(request,id):  
+    if request.method == 'POST':
+        return HttpResponse(json.dumps(id),content_type="application/json")
+    else:
+        return render_to_response('bootstrap.html')    
     
 login_username = ''
 

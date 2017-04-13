@@ -15,7 +15,7 @@ from app001 import models
 
 from app001.views import login_dresser
 
-import json,datetime
+import json,datetime,time
 
 import paramiko
 
@@ -70,7 +70,7 @@ def cmd_hostname(request):
 q = []
 
 
-def ssh2(ip,hostname,port,username,cmd_content,files,login_username,hostgroup_ids):
+def ssh2(ip,hostname,port,username,cmd_content,files,login_username,hostgroup_ids,number_of_machine):
     
     content = ''
 
@@ -126,11 +126,33 @@ def ssh2(ip,hostname,port,username,cmd_content,files,login_username,hostgroup_id
         try:
             ssh.connect(ip,port,username,key_filename='D:\Documents\Identity',timeout=2)
             
+            start_exec_time_stamp = time.time()
+            
+            start_exec_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            
             stdin, stdout, stderr = ssh.exec_command(cmd_content)  
-    
+            
             std_out = stdout.readlines()
     
             std_err = stderr.readlines()
+    
+            end_exec_time_stamp = time.time()
+            
+            end_exec_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+            diff_exec_time_stamp = end_exec_time_stamp - start_exec_time_stamp
+    
+
+            content = "第%d台机器</br>"%number_of_machine
+            content += "<font color='red'>开始时间:" + start_exec_time +"<br/>"
+            content += "结束时间:" + end_exec_time + "</font><br/>"
+            content += "执行时间:" + str(diff_exec_time_stamp) + "</font></br>"
+            content += "<font color='blue'>主机名:"+ hostname + "</br>"
+            content += "IP:" + ip + "</font><br/>"
+ 
+            content += "<font color='green'>输出内容:<br/>"
+
+
 
             if  std_out:
                 sql = 'update taskhoststatus set status=1 where id=%d'%task_id
@@ -143,19 +165,23 @@ def ssh2(ip,hostname,port,username,cmd_content,files,login_username,hostgroup_id
                                 
                 sql = 'insert into tasklog(result,log,host_id,date,task_id) values("%s","%s",%d,"%s",%d)'%('success',std_outs,host_name_id,datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),task_id)
                 print sql
-                cursor.execute(sql)
                 
-                
-                std_out.insert(0,"<font color='red'>"+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")+"<br/>"+hostname+":</font><br/>")
-                print '1111:',std_out
-                std_out.append('-'*100+" <br/>")
-                content += std_out[0]
-                for s in std_out[1:]:
+                try:
+                    cursor.execute(sql) 
+                except Exception,e:
+                    print e
+                    content += e              
+
+                for s in std_out:
                     s = s.replace("\n","<br/>")
                     s = s.replace(" ","&nbsp;")
                     if s.find('\x1b[7l'):
                         s = s.replace("\x1b[7l","")
                     content += s
+                    
+                content += "</font></br>"
+                
+                content += '-'*100+" <br/><br/>"  
                     
             elif std_err:
                 std_errs = ''
@@ -164,23 +190,31 @@ def ssh2(ip,hostname,port,username,cmd_content,files,login_username,hostgroup_id
                     std_errs += err
                 
                 sql = 'insert into tasklog(result,log,host_id,date,task_id) values("%s","%s",%d,"%s",%d)'%('failed',std_errs,host_name_id,datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),task_id)
-                cursor.execute(sql)    
+                
+                try:
+                    cursor.execute(sql)   
+                except Exception,e:
+                    print e
+                    content += e  
                                 
-                std_err.insert(0,"<font color='red'>"+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")+"<br/>"+hostname+":</font>  <br/>")
                 print '222:',std_err
-                std_err.append('-'*100+" <br/>")
-                content += std_err[0]
-                for s in std_err[1:]:
+
+                for s in std_err:
                     s = s.replace("\n","<br/>")
                     s = s.replace(" ","&nbsp;")
                     if s.find('\x1b[7l'):
                         s = s.replace("\x1b[7l","")
     
                     content += s  
+                    
+                content += "</font></br>"
+                
+                content += '-'*100+" <br/><br/>"        
+                    
             else:
                 sql = 'insert into tasklog(result,log,host_id,date,task_id) values("%s","%s",%d,"%s",%d)'%('failed',[u'命令执行完成，没有输出!'],host_name_id,datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),task_id)
                 cursor.execute(sql) 
-                content = "<font color='red'>"+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")+"<br/>"+hostname+":</font>  <br/>"
+          
                 print '333:'
                 content += u'命令执行完成，没有输出!<br />'
                 content += '-'*100+" <br/>"
@@ -191,12 +225,14 @@ def ssh2(ip,hostname,port,username,cmd_content,files,login_username,hostgroup_id
             sql = 'insert into tasklog(result,log,host_id,date,task_id) values("%s","%s",%d,"%s",%d)'%('failed',[str(e)],host_name_id,datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),task_id)
             cursor.execute(sql) 
             
-            content = "<font color='red'>"+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")+"<br/>"+hostname+":</font>  <br/>"
+            content = "第%d台机器<br />"%number_of_machine
+            content += "<font color='red'>"+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")+"<br/>"+hostname+":</font>  <br/>"
             content += str(e)
             content += u'<br />ip:%s 连接失败...............<br />'%ip
             content += '-'*100+" <br/>"
         
-        
+    except Exception,e:
+        print e    
           
         
         if files:
@@ -252,7 +288,7 @@ def cmd_run(request):
         host_ids = request.POST.getlist('host_id[]')
         hostgroup_ids = request.POST.getlist('hostgroup_id[]')
         if hostgroup_ids:
-            hostgroup_ids = hostgroup_ids[0]
+            hostgroup_ids = hostgroup_ids[0:]
             
         cmd_content = str(request.POST.get('cmd_content'))
 
@@ -265,11 +301,15 @@ def cmd_run(request):
         else:
             contents = ''
             ths = []
+            
+            number_of_machine = 1
             for host in host_ids:
                 host = models.Host.objects.get(id=host)
 
-                th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username,hostgroup_ids))
+                th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username,hostgroup_ids,number_of_machine))
                 ths.append(th)
+                
+                number_of_machine = number_of_machine + 1
 
             for i in ths:
                 i.setDaemon(False)    
@@ -295,13 +335,17 @@ def cmd_run(request):
             ths = []
             global q 
             q = []
+            
+            number_of_machine = 1
+            
             for hostgroup in hostgroup_ids:
                 hostgroup = int(hostgroup)
                 if hostgroup == 0:
                     hosts = models.Host.objects.filter(status=models.HostStatus.objects.get(name='online'))
                     for host in hosts:
-                        th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username,','.join(eval(hostgroup_ids))))
+                        th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username,hostgroup,number_of_machine))
                         ths.append(th)
+                        number_of_machine = number_of_machine + 1
 
                     for i in ths:
                         i.setDaemon(False)    
@@ -311,14 +355,15 @@ def cmd_run(request):
   
                 else:
                     for host in models.Host.objects.filter(hostgroup=models.HostGroup.objects.get(id=hostgroup),status=models.HostStatus.objects.get(name='online')):
-                        th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username,','.join(eval(hostgroup_ids))))
+                        th = threading.Thread(target=ssh2,args=(host.wan_ip or host.lan_ip,host.hostname,host.port,username_s,cmd_content,request.FILES,username,hostgroup,number_of_machine))
                         ths.append(th)
+                        number_of_machine = number_of_machine + 1
                         
-                    for i in ths:
-                        i.setDaemon(False)    
-                        i.start()
-                    for i in ths:    
-                        i.join()    
+            for i in ths:
+                i.setDaemon(False)    
+                i.start()
+            for i in ths:    
+                i.join()    
             
         contents = ''
         

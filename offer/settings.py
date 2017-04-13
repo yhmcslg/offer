@@ -55,7 +55,7 @@ MIDDLEWARE_CLASSES = (
     #'login_mymiddleware.login.login',
 )
 
-INTERNAL_IPS = ('127.0.0.1','192.168.1.239','58.210.188.238','route.9191offer.com','103.21.119.71')
+INTERNAL_IPS = ('127.0.0.1','172.28.30.27','58.210.188.238','route.9191offer.com','103.21.119.71')
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
 DEBUG_TOOLBAR_CONFIG = {"JQUERY_URL": ""}
 
@@ -105,8 +105,14 @@ WSGI_APPLICATION = 'offer.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        #'ENGINE': 'django.db.backends.sqlite3',
+        #'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'python_auto',
+        'USER':'root',
+        'PASSWORD':'',
+        'HOST':'localhost',
+        'PORT':3306,
     }
 }
 

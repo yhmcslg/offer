@@ -48,12 +48,11 @@
 					<select id="change_code_url" class="form-control"
 						name="change_code_url" onchange="get_svn_info()">
 						<option value="0" selected="selected">请选择SVN地址</option>
-						<option value="1">欧孚视聘: https://192.168.1.12/svn/BridgehrKit/VISS/solution/Online/AppService</option>
-						<option value="2">BOSS聘API: https://192.168.1.12/svn/BridgehrKit/VISS/solution/Online/BOSSAPI</option>
-						<option value="3">BOSS聘: https://192.168.1.12/svn/BridgehrKit/VISS/solution/Online/BOSSWEB</option>
-						<option value="4">欧孚科技: https://192.168.1.12/svn/BridgehrKit/VISS/solution/Online/Notice</option>
-						<option value="5">企业号: https://192.168.1.12/svn/BridgehrKit/VISS/solution/Online/qy</option>
-						<option value="6">测试: https://192.168.1.239:8443/svn/9191offer/offer</option>
+						<option value="1">欧孚视聘: https://172.28.100.12/svn/BridgehrKit/VISS/solution/Online/AppService</option>
+						<option value="2">BOSS聘API: https://172.28.100.12/svn/BridgehrKit/VISS/solution/Online/BOSSAPI</option>
+						<option value="3">BOSS聘: https://172.28.100.12/svn/BridgehrKit/VISS/solution/Online/BOSSWEB</option>
+						<option value="4">欧孚科技: https://172.28.100.12/svn/BridgehrKit/VISS/solution/Online/Notice</option>
+						<option value="5">企业号: https://172.28.100.12/svn/BridgehrKit/VISS/solution/Online/qy</option>
 					</select>
 				</div>
 
@@ -110,6 +109,10 @@
 								<tr>
 
 									<td align="left">
+										<input type="button" name="Submit_run1" value="CheckOut"
+											id="sys_run_button" onClick="return update_svn();">
+										&nbsp;&nbsp;
+									
 										<input type="button" name="Submit_run1" value="更新版本"
 											id="sys_run_button" onClick="return update_svn();">
 										&nbsp;&nbsp;

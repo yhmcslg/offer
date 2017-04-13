@@ -141,26 +141,27 @@ def weichat(request):
     sToken = "sF2N55REDOsWYnVC6dACwwhNJum"
     sEncodingAESKey = "fBSy5d73BFHjBnelPEFRyatfdzYXJlshNsTQV2Q7s8Y"
     sCorpID = "wxc46f6030a14f2c73"
-    
+     
     wxcpt=WXBizMsgCrypt(sToken,sEncodingAESKey,sCorpID)
-
+ 
     sVerifyMsgSig=request.GET.get('msg_signature')
-
+ 
     sVerifyTimeStamp=request.GET.get('timestamp')
-
+ 
     sVerifyNonce=request.GET.get('nonce')
-
+ 
     sVerifyEchoStr=request.GET.get('echostr')
     ret,sEchoStr=wxcpt.VerifyURL(sVerifyMsgSig, sVerifyTimeStamp,sVerifyNonce,sVerifyEchoStr)
-    
+     
     if(ret!=0):
         result = "ERR: VerifyURL ret: %d"%ret
         return HttpResponse(result)
-    
+     
     return HttpResponse(sEchoStr)
 
 
-def bootstrap(request,id):  
+
+def bootstrap(request):  
     if request.method == 'POST':
         return HttpResponse(json.dumps(id),content_type="application/json")
     else:
